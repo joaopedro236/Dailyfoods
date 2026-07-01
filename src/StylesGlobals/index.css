@@ -1,3 +1,4 @@
 @import "tailwindcss";
 @import "reset.css" layer(base);
+@import "root.css" layer(base);
 @import "assets.css" layer(base);

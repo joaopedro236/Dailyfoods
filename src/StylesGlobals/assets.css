@@ -1,0 +1,5 @@
+body {
+    font-family: sans-serif;
+    height: 200vh;
+    background-color: var(--body-background);
+}
