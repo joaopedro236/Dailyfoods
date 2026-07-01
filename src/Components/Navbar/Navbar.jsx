@@ -1,6 +1,6 @@
 import './Navbar.css'
 import { useState, useEffect,useRef } from 'react'
-import iconSearch from '../../assets/icons8-pesquisar-30.png'
+import iconSearch from '../../assets/Icons/icons8-pesquisar-30.png'
 import ItemsNavbar from './NavbarJSON'
 export default function Navbar() {
     const [inputActive, setInputActive] = useState(false)
