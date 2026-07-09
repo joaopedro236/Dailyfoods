@@ -1,3 +1,15 @@
-.navbar {
+.navbar,
+.menu {
     background-color: var(--primary-color);
 }
+
+.menu li.Active {
+    transform: translateX(-6px);
+}
+
+@media (min-width:1024px) {
+    .navbar,
+    .btnMenu {
+        display: none;
+    }
+}   

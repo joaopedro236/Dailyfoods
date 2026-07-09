@@ -1,7 +1,7 @@
 const ItemsNavbar = [
     {
         id:1,
-        name:'Nearly'
+        name:'Home'
     },
     {
         id:2,
@@ -9,11 +9,19 @@ const ItemsNavbar = [
     },
     {
         id:3,
-        name:'Top Review'
+        name:'Notification'
     },
     {
         id:4,
-        name:'Recommend'
+        name:'Create'
+    },
+    {
+        id:5,
+        name:'Login'
+    },
+    {
+        id:6,
+        name:'Account'
     },
 ]
 export default ItemsNavbar
