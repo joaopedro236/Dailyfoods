@@ -1,4 +1,14 @@
 :root {
-    --primary-color:#C31517;
-    --body-background:#e3e3e3;
-}
+    --primary-color:#161616;
+    --primary-red:#c01e2f;
+    --navbar-color: #0a0a0beb;
+    --card-color:#e2e2e2;
+    --shadow:rgba(0, 0, 0, 0.128);
+    --body-background:radial-gradient(
+        circle at top,
+        rgba(201, 30, 45, 0.04),
+        #f7f7f7 40%,
+        #f1f1f1 100%
+    );
+    --border:#00000007;
+}   
