@@ -1,0 +1,53 @@
+.registerStore {
+    background-color: var(--body-background);
+}
+
+
+
+
+.card__registerStore input {
+    border: 1px solid rgba(0, 0, 0, 0.128);
+}
+
+.inputs__registerStore input::placeholder {
+    transform: translateX(10px);
+}
+
+.submit__registerStore {
+    background-color: var(--primary-red);
+    box-shadow: 0px 0px 10px rgba(255, 0, 0, 0.162);
+}
+
+@media (hover:hover) {
+    .submit__registerStore:hover {
+        opacity: 85%;
+    }
+
+}
+
+@media (min-width:768px) {
+    .card__registerStore header {
+        align-items: initial;
+        justify-content: initial;
+        text-align: left;
+    }
+    
+    .card__registerStore {
+        
+        padding: 30px;
+        background-color: white;
+         border: 1px solid rgba(0, 0, 0, 0.128);
+    }
+    .card__registerStore header h1 {
+        font-size: 30px;
+    }
+    
+    .registerStore {
+        padding-top: 30px;
+        padding-left: 80px;
+    }
+    .complementary {
+        display: flex;
+        border-left: 1px solid rgba(0, 0, 0, 0.13);
+    }
+}
