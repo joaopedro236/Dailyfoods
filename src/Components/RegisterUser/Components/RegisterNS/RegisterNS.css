@@ -1,0 +1,20 @@
+
+.input_registerNS {
+    border: 1px solid rgba(255, 0, 0, 0.120);
+}
+@media (min-width:768px) {
+    
+    .cardRegisterNS{
+        border: 1px solid rgba(255, 0, 0, 0.140);
+    }
+    .registerNS {
+        align-items: center;
+        justify-content: center;
+    }
+    .registerNS header h1 {
+        font-size: 30px;
+    }
+    .registerNS header p{
+        font-size: 14.5px;
+    }
+}
