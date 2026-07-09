@@ -1,16 +1,32 @@
-# React + Vite
+# 🍔 Dailyfoods
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+**Dailyfoods** is a food delivery web application inspired by **iFood**, built to practice and demonstrate full-stack web development concepts.
 
-Currently, two official plugins are available:
+## 🚀 Technologies
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+* React
+* HTML5
+* CSS3
+* Tailwind CSS
+* JavaScript
+* Python
+* FastAPI
+* PostgreSQL
 
-## React Compiler
+## 📌 About the Project
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Dailyfoods is a full-stack application that simulates a modern food delivery platform. The project focuses on creating a responsive, intuitive, and scalable user experience while integrating a robust backend and database.
 
-## Expanding the Oxlint configuration
+## ✨ Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+* Responsive user interface
+* Restaurant and menu browsing
+* User authentication
+* FastAPI REST API
+* PostgreSQL database integration
+* Modern component-based architecture with React
+
+## 🎯 Purpose
+
+This project was developed to improve my skills in frontend and backend development, REST APIs, database design, and modern web application architecture.
+    
