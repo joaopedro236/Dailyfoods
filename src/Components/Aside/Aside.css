@@ -1,0 +1,13 @@
+.aside {
+    background-color: var(--primary-color);
+}
+.aside li.Active {
+    background-color: #ffffff11;
+    transition: background-color 0.2s ease-in-out;
+    border-left: 1.5px solid var(--primary-red);
+}
+@media (min-width:1024px) {
+    .aside {
+        display: flex;
+    }
+}
