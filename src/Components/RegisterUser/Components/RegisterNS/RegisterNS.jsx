@@ -1,11 +1,39 @@
 import './RegisterNS.css'
+import User from '../User/User'
 import inputs from './InputsJSON'
-import { Fragment, useState } from 'react'
-export default function RegisterNS({ state, setState, handleForm, formData, handleFormEdit, stateSection }) {
+import { useState, useEffect } from 'react'
+export default function RegisterNS({user, setUser, state, setState, handleForm, formData, handleFormEdit, stateSection }) {
     const [submitActive, setSubmitActive] = useState(false)
+    const [userData, setUserData] = useState({})
+    const APIURL = import.meta.env.VITE_API_URL
+    const APICall = async () => {
+        try {
+            const response = await fetch(`${APIURL}/api/user`, {
+
+                credentials: 'include'
+            })
+            const json = await response.json()
+            if (json.Status === true) {
+                setUser(true)
+                setUserData({
+                    name: json.name,
+                    email: json.email
+                })
+            }
+        }
+
+        catch (error) {
+            console.error(error)
+            return false
+        }
+    }
+    useEffect(() => {
+
+        APICall()
+    }, [])
     return (
         <>
-            <section className={`registerNS ${state == true && stateSection == 6 ? 'flex' : '!hidden'} bg-white w-full h-screen  pt-7`}>
+            <section className={`registerNS ${state == true && stateSection == 5 ? 'flex' : 'hidden'} ${user == true ? '!hidden' : ''} bg-white w-full h-screen  pt-7 `}>
                 <div className="cardRegisterNS w-full max-w-[720px] rounded-[16px] relative flex flex-col py-7  px-10 gap-4 h-full max-h-[580px]">
                     <header className='flex flex-col text-center items-center justify-center gap-0.5'>
                         <h1 className='text-[19px]'>It's great to see you here!</h1>
@@ -13,7 +41,15 @@ export default function RegisterNS({ state, setState, handleForm, formData, hand
 
                     </header>
                     <button className='closeRegisterNS absolute top-5 right-5 text-red-700' onClick={() => setState(false)}>X</button>
-                    <form className='flex flex-col gap-5 justify-center h-full' onSubmit={handleForm}>
+                    <form className='flex flex-col gap-5 justify-center h-full' onSubmit={async (e) => {
+                        e.preventDefault();
+                        setSubmitActive(true);
+                        const success = await handleForm(e)
+
+                        await APICall()
+
+                        setSubmitActive(false);
+                    }}>
                         {
                             inputs.map((inputsMap) => (
 
@@ -22,6 +58,7 @@ export default function RegisterNS({ state, setState, handleForm, formData, hand
                                     <input type={inputsMap.type} value={formData[inputsMap.formData] || ''} name={inputsMap.name} className='input_registerNS p-3  rounded-lg w-full' placeholder={inputsMap.placeholder} minLength={inputsMap.minLength} maxLength={inputsMap.maxLength} onChange={handleFormEdit} required />
                                 </div>
 
+
                             ))
                         }
                         <p className='text-gray-600 text-xs'>To adjust, go back to the previous screen.</p>
@@ -29,6 +66,7 @@ export default function RegisterNS({ state, setState, handleForm, formData, hand
                     </form>
                 </div>
             </section>
+            <User user={user} formData={userData} stateSection={stateSection} />
         </>
     )
 }
