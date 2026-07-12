@@ -9,11 +9,13 @@ def create_database():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users_Dailyfoods(
                 id SERIAL PRIMARY KEY,
-                email VARCHAR(350) UNIQUE ,
-                name_user VARCHAR(300) ,
+                email VARCHAR(350) UNIQUE NOT NULL,
+                name_user VARCHAR(300) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                CNPJ VARCHAR(14)  UNIQUE,
-                CEP VARCHAR(9) 
+                password VARCHAR(200) NOT NULL,
+                CNPJ VARCHAR(14)  UNIQUE NOT NULL,
+                CEP VARCHAR(9) NOT NULL,
+                session_token UUID NOT NULL
             )
         """)
         conn.commit()

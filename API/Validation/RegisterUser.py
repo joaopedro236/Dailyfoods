@@ -7,7 +7,7 @@ class Store(BaseModel):
     name:str
     CNPJ:str
     CEP: str
-    
+    password:str
     @field_validator('CNPJ')
     @classmethod
     def validationCNPJ(cls, value):
