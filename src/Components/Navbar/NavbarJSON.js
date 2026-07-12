@@ -7,20 +7,18 @@ const ItemsNavbar = [
         id:2,
         name:'Popular'
     },
+    
+    
     {
         id:3,
-        name:'Notification'
-    },
-    {
-        id:4,
         name:'Create'
     },
     {
-        id:5,
+        id:4,
         name:'Login'
     },
     {
-        id:6,
+        id:5,
         name:'Account'
     },
 ]

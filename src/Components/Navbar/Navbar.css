@@ -1,6 +1,9 @@
-.navbar,
 .menu {
     background-color: var(--primary-color);
+}
+
+.navbar.Active {
+    background-color: var(--navbar-background);
 }
 
 .menu li.Active {
@@ -8,8 +11,9 @@
 }
 
 @media (min-width:1024px) {
+
     .navbar,
     .btnMenu {
         display: none;
     }
-}   
+}
