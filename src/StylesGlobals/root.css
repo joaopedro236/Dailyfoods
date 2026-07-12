@@ -2,7 +2,9 @@
     --primary-color:#161616;
     --primary-red:#c01e2f;
     --navbar-color: #0a0a0beb;
+    --span-background:rgba(255, 255, 255, 0.184);
     --card-color:#e2e2e2;
+    --navbar-background:#1616169e;
     --shadow:rgba(0, 0, 0, 0.128);
     --body-background:radial-gradient(
         circle at top,
@@ -11,4 +13,5 @@
         #f1f1f1 100%
     );
     --border:#00000007;
+    --card_user-hover-background:rgba(128, 128, 128, 0.120);
 }   

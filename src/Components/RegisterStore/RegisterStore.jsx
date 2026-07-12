@@ -35,6 +35,7 @@ export default function RegisterStore({ state }) {
             event.preventDefault()
             const response = await fetch(`${apiURl}/api/registerStore`, {
                 method: 'POST',
+                credentials:'include'   ,
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -43,20 +44,27 @@ export default function RegisterStore({ state }) {
             const json = await response.json()
             if (!response.ok) {
                 alert(json.message);
-                return
+                return false
             }
-            if(json.Status == false){
+            if(json.StatusCnpj == true  || json.StatusEmail == true){
                 setCnpjError(true)
-            }else setCnpjError(false)
+                return false
+            }
+            return true
 
 
         } catch (error) {
             console.error(error)
+            return false
         }
+        finally {
+        setSubmitActive(false)
     }
+    }
+    
     return (
         <>
-            <section className={`registerStore w-full  min-h-screen  z-30 px-4 py-2  items-center justify-center ${state === 4 ? 'flex' : 'hidden'} `}>
+            <section className={`registerStore w-full  min-h-screen  z-30 px-4 py-2  items-center justify-center ${state === 3 ? 'flex' : 'hidden'} `}>
                 <div className=" card__registerStore w-full max-w-[830px] h-min flex  gap-6 rounded-[16px]  items-center justify-center px-3">
                     <div className="cardContent w-full  flex flex-col gap-6 h-min">
                         <header className='flex flex-col text-center items-center justify-center'>
@@ -65,7 +73,12 @@ export default function RegisterStore({ state }) {
                             <p className='text-gray-600 text-sm'>Get your business off to a great start.</p>
                         </header>
                         <div className="inputs__registerStore flex  relative    ">
-                            <form className='w-full h-full flex flex-col gap-7 relative' onSubmit={handleForm}>
+                            <form className='w-full h-full flex flex-col gap-7 relative' onSubmit={async (e) => {
+                                e.preventDefault()
+                                setSubmitActive(true)
+                                const success = await handleForm(e)
+                              
+                            }}>
                                 {
 
                                     inputs.map((inputsJSONMap) => (
@@ -74,7 +87,7 @@ export default function RegisterStore({ state }) {
                                         </Fragment>
                                     ))
                                 }
-                                <input type="submit" value="Sign Up Now" className={`submit__registerStore  text-white rounded-[12px] p-3 cursor-pointer w-full ${submitActive ? 'opacity-85' : ''}`} onClick={() => setSubmitActive(prev => !prev)} />
+                                <input type="submit" value="Sign Up Now" className={`submit__registerStore  text-white rounded-[12px] p-3 cursor-pointer w-full ${submitActive ? 'opacity-85' : ''}`} />
                                 <p className={`text-sm text-red-700 ${cnpjError ? 'flex' : 'hidden'}`}>This CPF is already in use.</p>
                             </form>
                         </div>

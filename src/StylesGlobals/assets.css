@@ -2,8 +2,7 @@
 
 body {
     font-family: 'Montserrat',sans-serif;
-    padding-top: 56px;
-    height: 100vh;
+    min-height: 100vh;
     width: 100%;
     background: var(--body-background);
 }
@@ -17,13 +16,14 @@ h1 {
     font-weight: 600;
 }
 
-
+span{
+    background-color: var(--span-background);
+}
 p, span {
   font-weight: 400;
 }
 @media (min-width:1024px) {
     body {
         padding-left:80px;
-        padding-top: 0px;
     }
 }

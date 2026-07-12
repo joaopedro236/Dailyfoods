@@ -6,11 +6,13 @@ import PhotoBackground from '../../assets/Photos/Gemini_Generated_Image_b7rt8lb7
 export default function Login({ state }) {
     const [submitActive, setSubmitActive] = useState(false)
     const [nextStep, setNextStep] = useState(false)
+    const [user, setUser] = useState(false)
     const [formData, setFormData] = useState({
         email: '',
         name: '',
         CNPJ: '',
-        CEP: ''
+        CEP: '',
+        password: ''
 
     })
     const handleFormEdit = (event) => {
@@ -28,10 +30,11 @@ export default function Login({ state }) {
             const fields = Object.values(formData)
             if (fields.some(values => String(values).trim() === '')) {
                 alert('Fill in all fields.')
-                return
+                return false
             }
-            const response = await fetch(`${apiURL}/api/registerUser`, {
+            const response = await fetch(`http://localhost:8000/api/registerUser`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -39,31 +42,34 @@ export default function Login({ state }) {
             })
             const json = await response.json()
             if (!response.ok) {
-                return ('Error API')
+                return false
             }
 
-            if (json.StatusEmail == true) {
+            if (json.StatusCnpj == true && json.StatusEmail === true) {
                 alert('Email already exists')
-                return
+                return false
             }
             if (json.StatusCnpj == true) {
                 alert('CNPJ already exists')
-                return
+                return false
             }
-            if (json.StatusCnpj == true && json.StatusEmail == true) {
-                alert('CNPJ and Email already exists')
-                return
+            if (json.StatusCnpj === true) {
+                alert('CNPJ already exists')
+                return false
             }
+
+            return true
 
         } catch (error) {
             console.error(error)
+            return false
         } finally {
             setSubmitActive(false);
         }
     }
     return (
         <>
-            <section className={`login w-full relative z-30 px-1 flex-col ${nextStep == false && state == 6 ? 'flex' : 'hidden'} `}>
+            <section className={`login w-full relative z-30 px-1 flex-col ${nextStep == false && state == 5  && user == false? 'flex' : 'hidden'} `}>
                 <header className='loginHeader relative z-10 flex flex-col p-7 gap-2 h-[300px] justify-center'>
                     <h1 className='text-white font-bold w-full max-w-56x text-[20px] '>Discover Dailyfoods plans and boost your sales.</h1>
                     <p className='text-gray-300 text-[12px]'>Discover how Dailyfoods plans can boost your sales by connecting your restaurant to millions of potential customers.</p>
@@ -86,7 +92,7 @@ export default function Login({ state }) {
                     <p className='text-sm text-gray-600'>By continuing, you agree to receive communications from Dailyfoods.</p>
                 </div>
             </section>
-            <RegisterNSComponent state={nextStep} stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
+            <RegisterNSComponent state={nextStep} user={user} setUser={setUser} stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
 
         </>
     )

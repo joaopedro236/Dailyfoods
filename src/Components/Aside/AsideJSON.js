@@ -15,23 +15,20 @@ const bottomNavbarItems = [
         name:'Popular',
         image:iconPopular
     },
+   
+    
     {
         id:3,
-        name:'notification',
-        image:iconNotification
-    },
-    {
-        id:4,
         name:'Create',
         image:iconCreate
     },
     {
-        id:5,
+        id:4,
         name:'Login Store',
         image:iconLogin
     },
     {
-        id:6,
+        id:5,
         name:'Account',
         image:iconAccount
     },
