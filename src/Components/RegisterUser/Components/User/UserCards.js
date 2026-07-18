@@ -19,7 +19,7 @@ const cards = [
         image:photoSecurity
     },
     {
-        id:3,
+        id:4,
         text:'Help and support',
         image:photoSupport
     }

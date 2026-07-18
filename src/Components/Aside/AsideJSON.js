@@ -3,7 +3,7 @@ import iconNotification from '../../assets/Icons/icons8-lembrete-de-compromissos
 import iconLogin from '../../assets/Icons/icons8-login-arredondado-à-direita-24.png'
 import iconAccount from '../../assets/Icons/icons8-homem-30.png'
 import iconCreate from '../../assets/Icons/icons8-soma-30.png'
-import iconPopular from '../../assets/Icons/icons8-tópico-popular-24.png'
+import iconSearch from '../../assets/Icons/icons8-pesquisar-30.png'
 const bottomNavbarItems = [
     {
         id:1,
@@ -12,8 +12,8 @@ const bottomNavbarItems = [
     },
     {
         id:2,
-        name:'Popular',
-        image:iconPopular
+        name:'Search',
+        image:iconSearch
     },
    
     

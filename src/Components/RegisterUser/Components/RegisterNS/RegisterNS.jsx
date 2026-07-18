@@ -2,7 +2,7 @@ import './RegisterNS.css'
 import User from '../User/User'
 import inputs from './InputsJSON'
 import { useState, useEffect } from 'react'
-export default function RegisterNS({user, setUser, state, setState, handleForm, formData, handleFormEdit, stateSection }) {
+export default function RegisterNS({ user, setUser, state, setState, handleForm, formData, handleFormEdit, stateSection, CNPJExists }) {
     const [submitActive, setSubmitActive] = useState(false)
     const [userData, setUserData] = useState({})
     const APIURL = import.meta.env.VITE_API_URL
@@ -42,13 +42,19 @@ export default function RegisterNS({user, setUser, state, setState, handleForm, 
                     </header>
                     <button className='closeRegisterNS absolute top-5 right-5 text-red-700' onClick={() => setState(false)}>X</button>
                     <form className='flex flex-col gap-5 justify-center h-full' onSubmit={async (e) => {
-                        e.preventDefault();
+                        e.preventDefault()
+                        if (submitActive) return
                         setSubmitActive(true);
-                        const success = await handleForm(e)
+                        try {
+                            const success = await handleForm(e)
 
-                        await APICall()
-
-                        setSubmitActive(false);
+                            await APICall()
+                        } catch (error) {
+                            console.error(error)
+                        }
+                        finally {
+                            setSubmitActive(false);
+                        }
                     }}>
                         {
                             inputs.map((inputsMap) => (
@@ -61,6 +67,7 @@ export default function RegisterNS({user, setUser, state, setState, handleForm, 
 
                             ))
                         }
+                        <p className={`text-red-700 text-sm ${CNPJExists ? 'flex' : 'hidden'}`}>CNPJ exists</p>
                         <p className='text-gray-600 text-xs'>To adjust, go back to the previous screen.</p>
                         < input type="submit" disabled={submitActive} value={submitActive ? "Loading..." : "Required data is missing."} className={`submit__registerStore  text-white rounded-[12px] p-3 mt-2 cursor-pointer w-full  ${submitActive ? 'opacity-85' : ''}`} />
                     </form>

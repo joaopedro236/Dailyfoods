@@ -1,10 +1,12 @@
 import './Login.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import RegisterNSComponent from './Components/RegisterNS/RegisterNS'
 import PhotoBackground from '../../assets/Photos/Gemini_Generated_Image_b7rt8lb7rt8lb7rt.png'
 
 export default function Login({ state }) {
     const [submitActive, setSubmitActive] = useState(false)
+    const [emailExists, setEmailExists] = useState(false)
+    const [CNPJExists, setCNPJExists] = useState(false)
     const [nextStep, setNextStep] = useState(false)
     const [user, setUser] = useState(false)
     const [formData, setFormData] = useState({
@@ -22,7 +24,28 @@ export default function Login({ state }) {
             [name]: value
         }))
     }
-    const apiURL = import.meta.env.VITE_API_URL
+    const apiURL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+    useEffect(() => {
+        const restoreSession = async () => {
+            try {
+                const response = await fetch(`${apiURL}/api/user`, {
+                    credentials: 'include'
+                })
+                const json = await response.json()
+
+                if (json.Status === true) {
+                    setUser(true)
+                    setNextStep(true)
+                }
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+        restoreSession()
+    }, [apiURL])
+
     const handleForm = async (event) => {
         event.preventDefault()
         setSubmitActive(true)
@@ -32,7 +55,7 @@ export default function Login({ state }) {
                 alert('Fill in all fields.')
                 return false
             }
-            const response = await fetch(`http://localhost:8000/api/registerUser`, {
+            const response = await fetch(`${apiURL}/api/registerUser`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -45,18 +68,17 @@ export default function Login({ state }) {
                 return false
             }
 
-            if (json.StatusCnpj == true && json.StatusEmail === true) {
-                alert('Email already exists')
+            if (json.StatusEmail === true) {
+                setEmailExists(true)
                 return false
             }
+            setEmailExists(false)
             if (json.StatusCnpj == true) {
-                alert('CNPJ already exists')
+                setCNPJExists(true)
                 return false
             }
-            if (json.StatusCnpj === true) {
-                alert('CNPJ already exists')
-                return false
-            }
+            setCNPJExists(false)
+
 
             return true
 
@@ -69,7 +91,7 @@ export default function Login({ state }) {
     }
     return (
         <>
-            <section className={`login w-full relative z-30 px-1 flex-col ${nextStep == false && state == 5  && user == false? 'flex' : 'hidden'} `}>
+            <section className={`login w-full relative z-30 px-1 flex-col ${nextStep == false && state == 5 && user == false ? 'flex' : 'hidden'} `}>
                 <header className='loginHeader relative z-10 flex flex-col p-7 gap-2 h-[300px] justify-center'>
                     <h1 className='text-white font-bold w-full max-w-56x text-[20px] '>Discover Dailyfoods plans and boost your sales.</h1>
                     <p className='text-gray-300 text-[12px]'>Discover how Dailyfoods plans can boost your sales by connecting your restaurant to millions of potential customers.</p>
@@ -86,13 +108,13 @@ export default function Login({ state }) {
                     }}>
                         <label htmlFor="email">Email</label>
                         <input type="email" name="email" id="email" placeholder={`Enter your email`} required className='bg-transparent p-2 py-2.5 rounded-md w-full' value={formData.email} onChange={handleFormEdit} />
-
+                        <p className={`text-red-700 text-sm ${emailExists ? 'flex' : 'hidden'}`}>This email already exists.</p>
                         <input type="submit" disabled={submitActive} value={submitActive ? "Loading..." : "Sign Up Now"} className={`submit__login  text-white rounded-[12px] mt-4 p-3 cursor-pointer w-full ${submitActive ? 'opacity-85' : ''}`} />
                     </form>
                     <p className='text-sm text-gray-600'>By continuing, you agree to receive communications from Dailyfoods.</p>
                 </div>
             </section>
-            <RegisterNSComponent state={nextStep} user={user} setUser={setUser} stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
+            <RegisterNSComponent state={nextStep} CNPJExists={CNPJExists} user={user} setUser={setUser} stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
 
         </>
     )

@@ -1,0 +1,60 @@
+.headerDashboardStore img,
+.card_dashboardStore {
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.114);
+}
+
+.headerDashboardStore {
+    background-color: var(--primary-red);
+}
+
+.recharts-wrapper:focus,
+.recharts-surface:focus {
+    outline: none;
+}
+.headerDashboardStore input {
+    border: 1px solid rgba(0, 0, 0, 0);
+}
+
+@media (max-width:410px) {
+    .cards_dashboardStore {
+        gap: 0px;
+    }
+}
+
+@media (min-width:788px) {
+
+    .cards_dashboardStore,
+    .cardsContent_dashboardStore,
+    .cards_dashboardStore header {
+        justify-content: initial;
+        align-items: initial;
+    }
+
+    .cardsContent_dashboardStore {
+        gap: 10px;
+    }
+
+
+}
+
+@media (min-width:1024px) {
+    .dashboardStoreContent {
+        display: grid;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 400px;
+        padding-top: 40px;
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+    }
+    .cards_dashboardStore{
+        margin-top: 0px; padding-top: 0px;
+    }
+    
+    .headerDashboardStore,
+    .dashboardStoreContent {
+        margin: 0 auto;
+        max-width: 1700px;
+    }
+
+}

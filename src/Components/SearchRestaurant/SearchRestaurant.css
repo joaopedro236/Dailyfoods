@@ -1,0 +1,14 @@
+.searchSection #search {
+    border: 1px solid #00000033;
+}
+@media (min-width:1024px) {
+    .searchSection {
+        padding-top: 15px;
+    }
+}
+@media (hover:hover) {
+    .restaurant:hover {
+        background-color: rgba(88, 88, 88, 0.091);
+        opacity: 0.9;
+    }
+}

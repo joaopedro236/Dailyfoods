@@ -15,15 +15,11 @@ export default function Navbar({ setState, state }) {
             const media = window.matchMedia('(max-width: 1024px)')
             if (window.scrollY > 56) {
                 setNavbarActive(true)
-                if (media.matches) {
-                    body.style.transition = 'padding-top 0.2s ease-in-out'
-                    body.style.paddingTop = '56px'
-                }
+               
 
             }
             else {
                 setNavbarActive(false)
-                body.style.paddingTop = '0'
             }
         }
         window.addEventListener('scroll', handleScroll)
