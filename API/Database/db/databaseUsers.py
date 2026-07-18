@@ -13,8 +13,8 @@ def create_database():
                 name_user VARCHAR(300) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 password VARCHAR(200) NOT NULL,
-                CNPJ VARCHAR(14)  UNIQUE NOT NULL,
-                CEP VARCHAR(9) NOT NULL,
+                CNPJ CHAR(14)  UNIQUE NOT NULL,
+                CEP CHAR(9) NOT NULL,
                 session_token UUID NOT NULL
             )
         """)

@@ -39,7 +39,7 @@ def register_user_validation(data: Store):
         }
 
     except Exception as e:
-        raise Exception(f'Error: {e}')
+        raise e
     finally:
         if cursor:
             cursor.close()
