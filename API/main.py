@@ -4,6 +4,7 @@ from API.Validation.RegisterStore import router as registerStore_verification
 from API.Validation.RegisterUser import router as registerUser_verification  
 from API.Routers.RegisterStoreResult import router as registerStore_result
 from API.Routers.RegisterUserResult import router as registerUser_result
+from API.Validation.GarbageUpload import garbage_upload 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
@@ -22,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Servir arquivos estáticos da pasta Uploads
+
 uploads_path = Path("Uploads")
 if uploads_path.exists():
     app.mount("/uploads", StaticFiles(directory="Uploads"), name="uploads")
@@ -35,3 +36,4 @@ app.include_router(registerUser_result)
 def startup():
     create_database()
     create_databaseRC()
+    garbage_upload()

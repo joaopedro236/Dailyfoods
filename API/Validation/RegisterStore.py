@@ -4,19 +4,39 @@ from ..Database.Config.connectDatabaseRestaurantConfig import connect_database
 
 router = APIRouter()
 
-
+class Orders(BaseModel):
+    orderImage: list[str]   = Field(default_factory=list)
+    orderName: str = Field(min_length=5, max_length=200)
+    orderPrice: float = Field(default=0.0)
+    orderDescription: str = Field(min_length=10, max_length=500)
+    orderState: bool = Field(default=True)
+    @classmethod
+    def as_form_orders(
+        cls,
+        orderImage: str = Form(...),
+        orderName: str = Form(...),
+        orderDescription: str = Form(...),
+        orderPrice: float = Form(0.0),
+        orderState: bool = Form(True),
+    ):
+        return cls(
+            orderImage=[orderImage],
+            orderName=orderName,
+            orderDescription=orderDescription,
+            orderPrice=orderPrice,
+            orderState=orderState,
+        )
 class Store(BaseModel):
-    name: str
-    CNPJ: str
-    CEP: str
-    invoicing: int = Field(default=0)
+    name: str = Field(min_length=5, max_length=200)
+    CNPJ: str 
+    CEP: str  
+    invoicing: float = Field(default=0.0)
     invoicing_history: list[float] = Field(default_factory=lambda: [0.0] * 7)
     orders: int = Field(default=0)
     completed: int = Field(default=0)
     progress: int = Field(default=0)
-    image: str = ''
-
-    @field_validator("CNPJ", check_fields=False)
+    image: str  = Field(default='')  
+    @field_validator("CNPJ")
     @classmethod
     def validationCNPJ(cls, value):
         value = value.replace(".", "").replace("-", "").replace("/", "")
@@ -31,7 +51,7 @@ class Store(BaseModel):
         name: str = Form(...),
         CNPJ: str = Form(...),
         CEP: str = Form(...),
-        invoicing: int = Form(default=0),
+        invoicing: float = Form(default=0.0),
         orders: int = Form(default=0),
         completed: int = Form(default=0),
         progress: int = Form(default=0)
@@ -40,10 +60,10 @@ class Store(BaseModel):
             name=name,
             CNPJ=CNPJ,
             CEP=CEP,
-            invoicing=invoicing,
-            orders=orders,
-            completed=completed,
-            progress=progress
+            invoicing=float(invoicing) if invoicing is not None else 0.0,
+            orders=int(orders) if orders is not None else 0,
+            completed=int(completed) if completed is not None else 0,
+            progress=int(progress) if progress is not None else 0,
         )
 
 @router.post("/api/registerStoreVerification")
