@@ -1,7 +1,7 @@
 :root {
     --primary-color:#161616ff;
     --primary-red:#c01e2fff;
-    --navbar-color: #0a0a0beb;
+--navbar-color: #0a0a0beb;
     --span-background:#ffffff2f;
     --card-color:#e2e2e2ff;
     --navbar-background:#1616169e;
@@ -15,5 +15,6 @@
         #f1f1f1 100%
     );
     --border:#00000007;
+    --section-background:#E8E4E1;
     --card_user-hover-background:#8080801f;
 }   

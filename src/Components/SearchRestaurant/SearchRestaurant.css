@@ -1,14 +1,24 @@
 .searchSection #search {
     border: 1px solid #00000033;
 }
+
+.filters_search button.Active {
+    color: var(--primary-red);
+}
+
 @media (min-width:1024px) {
     .searchSection {
         padding-top: 15px;
     }
 }
+
 @media (hover:hover) {
     .restaurant:hover {
         background-color: rgba(88, 88, 88, 0.091);
         opacity: 0.9;
+    }
+
+    .filters_search button:hover {
+        color: var(--primary-red);
     }
 }

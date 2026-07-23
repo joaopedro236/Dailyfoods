@@ -24,16 +24,17 @@ export default function Navbar({ setState, state }) {
         }
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
+    
     }, [])
     return (
         <>
-            <section className={`navbar duration-300 fixed w-full top-0 z-50 left-0 p-4 justify-between h-14  flex items-center ${navbarActive ? 'Active' : ''}`}>
+            <section className={`navbar duration-300 fixed w-full z-50 top-0 z-50 left-0 p-4 justify-between h-14  flex items-center ${navbarActive ? 'Active' : ''}`}>
                 <h1 className={`text-lg font-bold ${navbarActive ? 'text-white' : 'text-black'} duration-300`}>Dailyfood</h1>
                 <button className='btnMenu w-[20px] z-40 flex items-center justify-center h-min' onClick={() => setMenuActive(true)}>
                     <img src={iconMenu} alt="icon Menu" className={`btnMenu duration-300 ${navbarActive ? 'invert-100' : 'invert-0'}`}  />
                 </button>
             </section>
-            <section className={`menu fixed top-0 left-0 z-50 w-full h-screen flex items-center p-10 duration-300 ${menuActive ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+            <section className={`menu fixed top-0 left-0 z-[60] w-full h-screen flex items-center p-10 duration-300 ${menuActive ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
                 <button className='text-white fixed top-10 right-10 cursor-pointer ' onClick={() => setMenuActive(false)}>X</button>
                 <ul className='flex flex-col gap-2.5'>
                     {

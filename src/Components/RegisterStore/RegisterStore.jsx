@@ -22,7 +22,7 @@ export default function RegisterStore({ state }) {
         name: '',
         CNPJ: '',
         CEP: '',
-        image: null,
+        image: null
     })
     const [previewImage, setPreviewImage] = useState(null)
     const [formDataAPI, setFormDataAPI] = useState({})
@@ -120,7 +120,9 @@ export default function RegisterStore({ state }) {
 
                 credentials: 'include'
             })
+
             const jsonCall = await responseCall.json()
+;
             if (jsonCall.Status === true) {
                 setFormDataAPI({
                     name: jsonCall.name,
@@ -131,7 +133,8 @@ export default function RegisterStore({ state }) {
                     invoicing_history: jsonCall.invoicing_history,
                     orders: jsonCall.orders,
                     completed: jsonCall.completed,
-                    progress: jsonCall.progress
+                    progress: jsonCall.progress,
+                    orderExists:jsonCall.orderExists
                 })
                 setNextStep(true)
                 return

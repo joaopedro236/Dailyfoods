@@ -1,0 +1,12 @@
+.filtersRestaurant {
+    background: var(--section-background);
+}
+.filter button {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.471);
+}
+@media (hover:hover) {
+    .filter button:hover {
+        background-color: rgba(128, 128, 128, 0.121);
+        opacity: 0.8;
+    }
+}
