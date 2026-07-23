@@ -29,4 +29,14 @@ Dailyfoods is a full-stack application that simulates a modern food delivery pla
 ## 🎯 Purpose
 
 This project was developed to improve my skills in frontend and backend development, REST APIs, database design, and modern web application architecture.
-    
+
+## Application Flow
+
+1. Frontend sends user data to the backend.
+2. Backend receives and validates the data types (string, array, etc.).
+3. Backend checks if the user has a profile photo.
+4. If the user has no photo, a default image is assigned.
+5. All information is stored in the database.
+6. Authentication cookies are created.
+7. Backend sends the processed data back to the frontend.
+8. Frontend receives and displays the information.
