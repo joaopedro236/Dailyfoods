@@ -3,6 +3,7 @@ import { useMediaQuery } from "react-responsive";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import iconBuy from '../../../assets/Icons/icons8-compras-do-saco-cheio-48.png'
 import iconDollar from '../../../assets/Icons/icons8-dólar-64.png'
+import Orders from './Orders/Orders'
 import iconPurchaseCompleted from '../../../assets/Icons/icons8-logística-64.png'
 import iconTime from '../../../assets/Icons/icons8-cronômetro-66.png'
 import photoHidden from '../../../assets/Photos/219eaea67aafa864db091919ce3f5d82.jpg'
@@ -13,20 +14,18 @@ function Card_DashboardStore(props) {
             <div className="card_dashboardStore flex p-4 rounded-[10px] h-[140px] max-w-[170px] flex-col w-full  items-center justify-center gap-1">
                 <img src={props.icon} alt="icon card" className='w-full max-w-[47px] p-2.5 rounded-full' style={{ backgroundColor: props.color }} />
                 <h1 className='text-[19px]'>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, }).format(props.formDataAPI?.[props.formDataAPIName] ?? 0)}</h1>
-                
+
                 <p className='text-[12.5px]'>{props.title}</p>
             </div>
         </>
     )
 }
 export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nextStep, setNextStep, previewImage, setPreviewImage, onImageSelect }) {
-    
-
     const chartData = formDataAPI?.invoicing_history?.map((value, index) => ({
         day: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index],
         invoicing: value
     }));
-    
+    const [ordersSectionActive, setOrdersSectionActive] = useState(false)
     const isMobile = useMediaQuery({ maxWidth: 768 });
     const [inputFileActive, setInputFileActive] = useState(false)
     const currentImage = previewImage || formDataAPI?.image || photoHidden
@@ -162,11 +161,12 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
                         <h1>Create Menu</h1>
                     </header>
                     <div className="orderCheckoutContent w-full  flex items-center justify-center flex-col gap-3">
-                    <button className='w-full text-white p-3 rounded-lg'>Create Menu</button>
-                    <p className='text-red-600 text-xs'>*Unfortunately, you don't have a menu.</p>
+                        <button className='w-full text-white p-3 rounded-lg'>Create Menu</button>
+                        <p className='text-red-600 text-xs'>*Unfortunately, you don't have a menu.</p>
                     </div>
                 </div>
             </section>
+            <Orders stateSection={state} setOrdersSectionActive={setOrdersSectionActive} ordersSectionActive={ordersSectionActive}/>
         </>
     )
 }

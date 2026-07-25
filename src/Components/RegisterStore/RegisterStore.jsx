@@ -191,7 +191,7 @@ export default function RegisterStore({ state }) {
                                 }
                                 <div className="flex flex-col gap-1">
                                     <label htmlFor="image" className='text-sm'>Restaurant photo</label>
-                                    <input type="file" name="image" id="image" accept="image/*" onChange={handleFileChange} className='bg-transparent p-2 py-2.5 rounded-md w-full' />
+                                    <input type="file" name="image" id="image" accept="image/*" onChange={handleFileChange} className='bg-transparent p-2 py-2.5 rounded-md w-full' />  
                                  
                                 </div>
                                 <input type="submit" value={`${submitActive ? 'Loading' : 'Sign up Now'}`} className={`submit__registerStore  text-white rounded-[12px] p-3 cursor-pointer w-full ${submitActive ? 'opacity-85' : ''}`} />
@@ -200,7 +200,7 @@ export default function RegisterStore({ state }) {
                         </div>
                     </div>
                     <div className="complementary h-min w-full hidden max-w-[360px] flex flex-col  px-7 items-center  gap-5">
-                        <img src={PhotoDesktop} alt="photo restaurant" className='w-full h-[240px]' />
+                          <img src={PhotoDesktop} alt="photo restaurant" className='w-full h-[240px]' />
                         <h1 className='text-[18px] font-bold'>Grow your restaurant with confidence.</h1>
                         <p className='text-md text-gray-500'>DailyFoods provides everything you need to manage your menu, track orders, optimize daily operations, and deliver an exceptional dining experience.</p>
                     </div>

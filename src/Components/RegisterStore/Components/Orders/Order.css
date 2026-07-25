@@ -1,0 +1,32 @@
+.ordersCreate {
+    background-color: var(--section-background);
+}
+
+.ordersCreate input {
+    border: 1px solid rgba(0, 0, 0, 0.128);
+}
+
+.submit_orders {
+    background-color: var(--primary-red);
+}
+
+@media (min-width:730px) {
+    .inputs_ordersCreate {
+        max-width: 700px;
+        margin: 0 auto;
+        margin-top: 20px;
+        border-radius: 10px;
+        border: 1px solid rgba(0, 0, 0, 0.077);
+        padding: 15px;
+        background-color: var(--card-color);
+    }
+    .form_ordersCreate {
+        gap: 3px;
+    }
+}
+
+@media (hover:hover) {
+    .submit_orders:hover {
+        opacity: 0.7;
+    }
+}
