@@ -1,5 +1,5 @@
 from ..Database.Config.connectDatabaseRestaurantConfig import connect_database
-from fastapi import APIRouter, Cookie, Response, UploadFile, Depends, Request
+from fastapi import APIRouter, Form, Cookie, Response, UploadFile, Depends, Request,File
 import uuid
 from pathlib import Path
 from ..Validation.RegisterStore import Store, Orders
@@ -13,16 +13,13 @@ async def register_store(
     response: Response,
     request: Request,
     data: Store = Depends(Store.as_form),
-    
 ):
     conn = None
     cursor = None
     session_token = str(uuid.uuid4())
     dayWeek = datetime.today().weekday()
     Uploads = Path(__file__).resolve().parents[2] / "Uploads"
-    UploadsOrders = Path(__file__).resolve().parents[2] / "UploadsOrders"
     Uploads.mkdir(exist_ok=True)
-    UploadsOrders.mkdir(exist_ok=True)
 
     async def save_image(file: UploadFile, folder: Path):
         filename = file.filename or "upload"
@@ -35,20 +32,15 @@ async def register_store(
 
     imageName = "219eaea67aafa864db091919ce3f5d82.jpg"
     image_url = f"http://localhost:8000/uploads/{imageName}"
-    imageName_Orders = f"813789.png"
-    image_url_orders = f"http://localhost:8000/uploadsOrders/{imageName_Orders}"
     try:
         form = await request.form()
         image_file = form.get("image")
-        image_file_orders = form.get("image_orders")
         if image_file and image_file.filename:
             imageName = await save_image(image_file, Uploads)
 
-        if image_file_orders and image_file_orders.filename:
-            imageName_Orders = await save_image(image_file_orders, UploadsOrders)
-            
+      
         image_url = f"http://localhost:8000/uploads/{imageName}"
-        image_url_orders = f"http://localhost:8000/uploadsOrders/{imageName_Orders}"
+       
         invoicing_history = [0.0] * 7
         invoicing_history[dayWeek] = float(data.invoicing)
 
@@ -64,17 +56,21 @@ async def register_store(
                     """
                     UPDATE restaurantConfig
                     SET 
-                        image = %s,
-                        imageOrders = %s
+                        image = %s
+                        
                     WHERE CNPJ = %s
                 """,
-                    (imageName, imageName_Orders, data.CNPJ),
+                    (imageName, data.CNPJ),
                 )
                 conn.commit()
-                return {"Status": True, "token": store[0], "image": image_url,"imageOrders": image_url_orders,}
+                return {
+                    "Status": True,
+                    "token": store[0],
+                    "image": image_url
+                }
 
-            command_sql = """ INSERT INTO restaurantConfig(name,image, CNPJ, CEP, session_token, invoicing, invoicing_history, orders, completed, progress, orderImage, orderName, orderPrice ,orderDescription, orderState)
-                            VALUES (%s, %s,%s, %s, %s, %s, %s, %s ,%s, %s, %s, %s, %s, %s, %s)"""
+            command_sql = """ INSERT INTO restaurantConfig(name,image, CNPJ, CEP, session_token, invoicing, invoicing_history, orders, completed, progress)
+                            VALUES (%s, %s,%s, %s, %s, %s, %s, %s ,%s, %s)"""
             cursor.execute(
                 command_sql,
                 (
@@ -87,12 +83,7 @@ async def register_store(
                     invoicing_history,
                     data.orders,
                     data.completed,
-                    data.progress,
-                    [imageName_Orders],
-                    None,
-                    None,
-                    None,
-                    None,
+                    data.progress
                 ),
             )
             conn.commit()
@@ -112,7 +103,6 @@ async def register_store(
                 "Status": True,
                 "token": session_token,
                 "image": image_url,
-                "imageOrders": image_url_orders,
                 "warning": str(db_error),
             }
 
@@ -128,7 +118,6 @@ async def register_store(
             "Status": True,
             "token": session_token,
             "image": image_url,
-            "imageOrders": image_url_orders,
         }
 
     except Exception as e:
@@ -138,7 +127,6 @@ async def register_store(
             "Status": True,
             "token": session_token,
             "image": image_url,
-            "imageOrders": image_url_orders,
             "warning": str(e),
         }
     finally:
@@ -189,10 +177,13 @@ def get_store(
                 store[6] = 0
                 store[7] = 0
                 store[8] = 0
-            if all(store[10] [11] [12] [13]):
-               
-                cursor.execute(''' UPDATE restaurantConfig 
-                                SET orderExists = array[true] where session_token = %s''', (token,))
+            if all([store[10], store[11], store[12], store[13]]):
+
+                cursor.execute(
+                    """ UPDATE restaurantConfig 
+                                SET orderExists = true where session_token = %s""",
+                    (token,),
+                )
                 orderExists = True
             return {
                 "Status": True,
@@ -209,7 +200,7 @@ def get_store(
                 "orderPrice": store[11],
                 "orderDescription": store[12],
                 "orderState": store[13],
-                'orderExists': orderExists
+                "orderExists": orderExists,
             }
         return {"Status": False}
     except Exception as e:
@@ -236,7 +227,7 @@ def restaurants():
                 "name": row[1],
                 "image": f"http://localhost:8000/uploads/{row[2]}",
                 "cep": row[3],
-                "orderExists": row[4]
+                "orderExists": row[4],
             }
             for row in rows
         ]
@@ -255,10 +246,11 @@ def update_metrics(data: Store):
     conn, cursor = connect_database()
     cursor.execute(
         "SELECT invoicing_history FROM restaurantConfig WHERE CNPJ = %s", (data.CNPJ,)
+
     )
     result = cursor.fetchone()
     if result is None:
-        return {"Status": False, "Error": "CNPJ não encontrado"}
+        return {"Status": False, "Error": "CNPJ not found"}
 
     history = [float(x) for x in result[0]]
     day = datetime.today().weekday()
@@ -286,3 +278,50 @@ def update_metrics(data: Store):
 
     conn.commit()
     return {"Status": True}
+
+
+@router.post("/orders")
+async def orders(
+    restaurant_session_token: str = Cookie(),
+    orderName: str = Form(),
+    orderDescription: str = Form(),
+    orderPrice: float = Form(),
+    image_orders: UploadFile = File(),
+):
+    conn = None
+    cursor = None
+    try:
+        UploadsOrders = Path(__file__).resolve().parents[2] / "UploadsOrders"
+        UploadsOrders.mkdir(exist_ok=True)
+        extension = Path(image_orders.filename).suffix
+        image_name = f"{uuid.uuid4().hex}{extension}"
+
+        with open(UploadsOrders / image_name, "wb") as f:
+            f.write(await image_orders.read())
+        conn,cursor = connect_database()
+        command_sql = """
+            UPDATE restaurantConfig
+            SET
+                orderImage = array_append(COALESCE(orderImage, ARRAY[]::text[]), %s),
+                orderName = array_append(COALESCE(orderName, ARRAY[]::text[]), %s),
+                orderPrice = array_append(COALESCE(orderPrice, ARRAY[]::numeric[]), %s),
+                orderDescription = array_append(COALESCE(orderDescription, ARRAY[]::text[]), %s),
+                orderState = array_append(COALESCE(orderState, ARRAY[]::boolean[]), %s),
+                orderExists = true
+            WHERE session_token = %s
+            """
+        cursor.execute(command_sql,( image_name, orderName, orderPrice, orderDescription, False, restaurant_session_token))
+        conn.commit()
+        return {
+            'Status': True,
+            "image": f"http://localhost:8000/uploadsOrders/{image_name}",
+        }
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        return {'Status': False, 'Error': str(e)}
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
