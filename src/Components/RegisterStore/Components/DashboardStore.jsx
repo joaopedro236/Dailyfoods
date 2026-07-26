@@ -103,10 +103,29 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
             updateMetrics()
         }, 50000);
         return () => clearInterval(interval)
-    }, [formDataAPI]);
+    }, [formDataAPI?.CNPJ]);
+    const [ordersForm, setOrdersForm] = useState([])
+    const ordersMetrics = async () => {
+        try {
+            const responseOrders = await fetch(`${APIURL}/orders_items`, {
+                credentials: 'include'
+            })
+            if (!responseOrders) {
+                throw new Error(`Request error: ${responseOrders.status}`);
+            }
+            const jsonOrders = await responseOrders.json()
+            setOrdersForm(jsonOrders.orders || [])
+        } catch (error) {
+            console.error(error)
+        }
+    }
+    useEffect(() => {
+        ordersMetrics()
+    }, [])
+    const [orderCardActive, setOrderCardActive] = useState(-1)
     return (
         <>
-            <section className={`dashboardStore ${nextStep == true && state == 3 ? 'flex' : 'hidden'} w-full flex-col`}>
+            <section className={`dashboardStore ${nextStep == true && state == 1 ? 'flex' : 'hidden'} w-full flex-col`}>
                 <header className='headerDashboardStore w-full text-white p-4 pt-7 flex flex-col items-center justify-center'>
                     <img src={currentImage} alt="photo hidden" className='cursor-pointer w-[110px] h-[110px] object-cover rounded-full' onClick={() => setInputFileActive(prev => !prev)} />
                     <h1 className='text-lg mt-2'>{formDataAPI?.name}</h1>
@@ -161,12 +180,45 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
                         <h1>Create Menu</h1>
                     </header>
                     <div className="orderCheckoutContent w-full  flex items-center justify-center flex-col gap-3">
-                        <button className='w-full text-white p-3 rounded-lg'>Create Menu</button>
+                        <button className='w-full text-white p-3 rounded-lg' onClick={() => setOrdersSectionActive(true)}
+                        >Create Menu</button>
                         <p className='text-red-600 text-xs'>*Unfortunately, you don't have a menu.</p>
                     </div>
                 </div>
+                <div className={`orderCheckout px-4 py-6 ${formDataAPI?.orderExists == true ? 'flex' : 'hidden'}  bg-white  flex-col w-full  max-w-[400px] items-center justify-center rounded-lg gap-3`}>
+                    <header className='w-full flex items-center justify-center'>
+                        <h1>Add order</h1>
+                    </header>
+                    <div className="orderCheckoutContent w-full  flex items-center justify-center flex-col gap-3">
+                        <button className='w-full text-white p-3 rounded-lg' onClick={() => setOrdersSectionActive(true)}
+                        >Add order</button>
+                    </div>
+                </div>
+                <div className={`orders ${formDataAPI?.orderExists == true ? 'flex' : 'hidden'} mt-2 flex-col w-full w-full gap-2 p-3`}>
+                    <header className='flex flex-col '>
+                        <h1>Menu</h1>
+                    </header>
+                    <div className="ordersContent flex mt-5 flex-col w-full bg-white p-3  rounded-lg gap-2">
+                        {
+                            ordersForm.map((ordersFormMap, index) => (
+                                <div className={`orderCard  flex cursor-pointer items-center p-3  rounded-lg gap-5 ${orderCardActive === index? 'flex-col opacity-100!  items-start gap-0' : ''}`} key={index} onClick={() => setOrderCardActive(orderCardActive === index ? -1 : index)}>
+                                    <header className={`flex gap-3 items-center `}>
+                                        <img src={ordersFormMap.image} alt="order image" className='w-[60px] rounded-lg' />
+                                        <h2 className={`${orderCardActive === index? 'text-[17px]' :''}`}>{ordersFormMap.name}</h2>
+                                    </header>
+                                    <p className={`text-[16px] ${orderCardActive ===index? 'flex' : 'hidden'}`}>{ordersFormMap.description}</p>
+                                    <p className={` text-sm ${orderCardActive === index? 'text-left ml-0' : 'ml-auto text-right'}`}>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, }).format(ordersFormMap?.price ?? 0)}</p>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </div>
             </section>
-            <Orders stateSection={state} setOrdersSectionActive={setOrdersSectionActive} ordersSectionActive={ordersSectionActive}/>
+            <Orders stateSection={state}
+                setOrdersSectionActive={setOrdersSectionActive}
+                OrdersSectionActive={ordersSectionActive}
+
+            />
         </>
     )
 }

@@ -48,7 +48,7 @@
         min-height: 400px;
         padding-top: 40px;
         width: 100%;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns:1fr 1fr;
     }
     .orderCheckout {
         padding: 30px;
@@ -68,4 +68,13 @@
         max-width: 1700px;
     }
 
+}
+
+@media (hover:hover) {
+    .orderCheckout button:hover {
+        opacity: 0.85;
+    }
+    .orderCard:hover {
+        opacity: 0.75;
+    }
 }

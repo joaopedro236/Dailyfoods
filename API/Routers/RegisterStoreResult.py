@@ -325,3 +325,45 @@ async def orders(
             cursor.close()
         if conn:
             conn.close()
+
+@router.get('/orders_items')
+def orders_items(restaurant_session_token: str = Cookie()):
+    try:
+        conn,cursor = connect_database()
+        command_sql = '''
+        SELECT
+            orderImage,
+            orderName,
+            orderPrice,
+            orderDescription,
+            orderState
+        FROM restaurantConfig
+        WHERE session_token = %s'''
+        cursor.execute(command_sql, (restaurant_session_token,))
+        result = cursor.fetchone()
+        if not result:
+            return{'Status':False}
+        orders = []
+        for i in range(len(result[1])):
+            orders.append({
+                "image": f"http://localhost:8000/uploadsOrders/{result[0][i]}",
+                "name": result[1][i],
+                "price": result[2][i],
+                "description": result[3][i],
+                "state": result[4][i],
+            })
+
+        return {
+            'Status':True,
+            'orders': orders
+        }
+    except Exception as e:
+        return{
+            'Status':False,
+            'Error': str(e)
+        }
+    finally:
+        if cursor:
+            cursor.close()
+        if conn :
+            conn.close()

@@ -27,7 +27,9 @@ app.add_middleware(
 uploads_path = Path("Uploads")
 if uploads_path.exists():
     app.mount("/uploads", StaticFiles(directory="Uploads"), name="uploads")
-
+uploads_orders_path = Path("UploadsOrders")
+if uploads_orders_path.exists():
+    app.mount("/uploadsOrders", StaticFiles(directory="UploadsOrders"), name="uploadsOrders")
 app.include_router(registerStore_verification)
 app.include_router(registerStore_result)
 app.include_router(registerUser_verification)
