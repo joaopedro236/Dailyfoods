@@ -1,7 +1,9 @@
 import './RegisterStore.css'
+import itemsSelect from './RegisterStoreSelectJSON'
 import DashboardStore from './Components/DashboardStore'
 import PhotoDesktop from '../../assets/Photos/screenshot_30.png'
 import { useState, useEffect } from 'react'
+import Select from 'react-select';
 import inputs from './RegisterStoreJSON'
 import { Fragment } from 'react'
 function Input(props) {
@@ -14,7 +16,7 @@ function Input(props) {
         </>
     )
 }
-export default function RegisterStore({ state }) {
+export default function RegisterStore({ state, nextStepTwo }) {
     const [submitActive, setSubmitActive] = useState(false)
     const [cnpjError, setCnpjError] = useState(false)
     const [nextStep, setNextStep] = useState(false)
@@ -22,6 +24,7 @@ export default function RegisterStore({ state }) {
         name: '',
         CNPJ: '',
         CEP: '',
+        password: '',
         image: null
     })
     const [previewImage, setPreviewImage] = useState(null)
@@ -70,17 +73,19 @@ export default function RegisterStore({ state }) {
             const selectedImage = imageInput?.files?.[0] ?? formData.image ?? null
 
             setFormData(prev => ({ ...prev, image: selectedImage }))
-
+            const tags = selectedCategories.map(item => item.value);
             form.append("name", formData.name)
             if (selectedImage) {
                 form.append("image", selectedImage, selectedImage.name)
             }
             form.append("CNPJ", formData.CNPJ)
             form.append("CEP", formData.CEP)
+            form.append("password", formData.password)
+            form.append("restauranttag", JSON.stringify(tags));
             const response = await fetch(`${APIURL}/api/registerStore`, {
                 method: 'POST',
                 credentials: 'include',
-              
+
                 body: form
             })
             const json = await response.json()
@@ -98,6 +103,7 @@ export default function RegisterStore({ state }) {
                 name: formData.name,
                 CNPJ: formData.CNPJ,
                 CEP: formData.CEP,
+                password: formData.password,
                 image: json.image || previewImage || prev.image
             }))
             try {
@@ -114,6 +120,11 @@ export default function RegisterStore({ state }) {
         }
 
     }
+    useEffect(() => {
+        if (nextStepTwo === true) {
+            setNextStep(true)
+        }
+    }, [nextStepTwo])
     const APICall = async () => {
         try {
             const responseCall = await fetch(`${APIURL}/api/store`, {
@@ -122,11 +133,11 @@ export default function RegisterStore({ state }) {
             })
 
             const jsonCall = await responseCall.json()
-;
+                ;
             if (jsonCall.Status === true) {
                 setFormDataAPI({
                     name: jsonCall.name,
-                    image:jsonCall.image,
+                    image: jsonCall.image,
                     CNPJ: jsonCall.CNPJ,
                     CEP: jsonCall.CEP,
                     invoicing: jsonCall.invoicing,
@@ -134,7 +145,8 @@ export default function RegisterStore({ state }) {
                     orders: jsonCall.orders,
                     completed: jsonCall.completed,
                     progress: jsonCall.progress,
-                    orderExists:jsonCall.orderExists
+                    orderExists: jsonCall.orderExists,
+                    password: formData.password
                 })
                 setNextStep(true)
                 return
@@ -154,10 +166,11 @@ export default function RegisterStore({ state }) {
                 URL.revokeObjectURL(previewImage)
             }
         }
-    }, [])
+    }, [state])
+    const [selectedCategories, setSelectedCategories] = useState([]);
     return (
         <>
-            <section className={`registerStore w-full  min-h-screen  z-30 px-4 py-2 pt-5 items-center justify-center ${state === 3 && nextStep == false ? 'flex' : 'hidden'} `}>
+            <section className={`registerStore w-full  min-h-screen  z-30 px-4 py-2 pt-[90px] items-center justify-center ${state === 3 && nextStep == false ? 'flex' : 'hidden'} `}>
                 <div className=" card__registerStore w-full max-w-[930px]  h-min flex  gap-6 rounded-[16px]  items-center justify-center px-3">
                     <div className="cardContent w-full  flex flex-col gap-6 h-min">
                         <header className='flex flex-col text-center items-center justify-center'>
@@ -190,9 +203,44 @@ export default function RegisterStore({ state }) {
                                     ))
                                 }
                                 <div className="flex flex-col gap-1">
-                                    <label htmlFor="image" className='text-sm'>Restaurant photo</label>
-                                    <input type="file" name="image" id="image" accept="image/*" onChange={handleFileChange} className='bg-transparent p-2 py-2.5 rounded-md w-full' />  
-                                 
+                                    <label htmlFor="tags" className='text-sm'>Tags</label>
+                                    <Select
+                                        options={itemsSelect}
+                                        isMulti
+                                        value={selectedCategories}
+                                        onChange={setSelectedCategories}
+                                        styles={{
+                                            control: (base) => ({
+                                                ...base,
+                                                cursor: "pointer",
+                                            }),
+                                            option: (base) => ({
+                                                ...base,
+                                                cursor: "pointer",
+                                            }),
+                                            multiValueRemove: (base) => ({
+                                                ...base,
+                                                cursor: "pointer",
+                                            }),
+                                            dropdownIndicator: (base) => ({
+                                                ...base,
+                                                cursor: "pointer",
+                                            }),
+                                            clearIndicator: (base) => ({
+                                                ...base,
+                                                cursor: "pointer",
+                                            })
+                                        }}
+                                        placeholder='Select restaurant categories...'
+                                        closeMenuOnSelect={false}
+                                        required
+                                    />
+
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <label htmlFor="image" className='text-sm cursor-pointer'>Restaurant photo</label>
+                                    <input type="file" name="image" id="image" accept="image/*" onChange={handleFileChange} className='bg-transparent p-2 py-2.5 rounded-md w-full' />
+
                                 </div>
                                 <input type="submit" value={`${submitActive ? 'Loading' : 'Sign up Now'}`} className={`submit__registerStore  text-white rounded-[12px] p-3 cursor-pointer w-full ${submitActive ? 'opacity-85' : ''}`} />
                                 <p className={`text-sm text-red-700 ${cnpjError ? 'flex' : 'hidden'}`}>This CNPJ is already in use.</p>
@@ -200,7 +248,7 @@ export default function RegisterStore({ state }) {
                         </div>
                     </div>
                     <div className="complementary h-min w-full hidden max-w-[360px] flex flex-col  px-7 items-center  gap-5">
-                          <img src={PhotoDesktop} alt="photo restaurant" className='w-full h-[240px]' />
+                        <img src={PhotoDesktop} alt="photo restaurant" className='w-full h-[240px]' />
                         <h1 className='text-[18px] font-bold'>Grow your restaurant with confidence.</h1>
                         <p className='text-md text-gray-500'>DailyFoods provides everything you need to manage your menu, track orders, optimize daily operations, and deliver an exceptional dining experience.</p>
                     </div>

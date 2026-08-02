@@ -72,17 +72,21 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
         try {
             const response_updateMetrics = await fetch(`${APIURL}/api/store/metrics`, {
                 method: 'PUT',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    name: formDataAPI.name,
-                    CNPJ: formDataAPI.CNPJ,
-                    CEP: formDataAPI.CEP,
-                    invoicing: formDataAPI.invoicing,
-                    orders: formDataAPI.orders,
-                    completed: formDataAPI.completed,
-                    progress: formDataAPI.progress,
+                    name: formDataAPI.name || 'Restaurant',
+                    CNPJ: formDataAPI.CNPJ || '',
+                    CEP: formDataAPI.CEP || '00000-000',
+                    invoicing: Number(formDataAPI.invoicing || 0),
+                    invoicing_history: formDataAPI.invoicing_history || [0, 0, 0, 0, 0, 0, 0],
+                    orders: Number(formDataAPI.orders || 0),
+                    completed: Number(formDataAPI.completed || 0),
+                    progress: Number(formDataAPI.progress || 0),
+                    image: formDataAPI.image || '',
+                    password: formDataAPI.password || '',
                 }),
             })
             if (!response_updateMetrics) {
@@ -125,7 +129,7 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
     const [orderCardActive, setOrderCardActive] = useState(-1)
     return (
         <>
-            <section className={`dashboardStore ${nextStep == true && state == 1 ? 'flex' : 'hidden'} w-full flex-col`}>
+            <section className={`dashboardStore ${nextStep == true && state == 3 && ordersSectionActive == false ? 'flex' : 'hidden'} w-full flex-col`}>
                 <header className='headerDashboardStore w-full text-white p-4 pt-7 flex flex-col items-center justify-center'>
                     <img src={currentImage} alt="photo hidden" className='cursor-pointer w-[110px] h-[110px] object-cover rounded-full' onClick={() => setInputFileActive(prev => !prev)} />
                     <h1 className='text-lg mt-2'>{formDataAPI?.name}</h1>
@@ -174,50 +178,51 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
-                </div>
-                <div className={`orderCheckout px-3 ${formDataAPI?.orderExists == false ? 'flex' : 'hidden'}   flex-col w-full  max-w-[400px] items-center justify-center gap-5`}>
-                    <header className='w-full flex items-center justify-center'>
-                        <h1>Create Menu</h1>
-                    </header>
-                    <div className="orderCheckoutContent w-full  flex items-center justify-center flex-col gap-3">
-                        <button className='w-full text-white p-3 rounded-lg' onClick={() => setOrdersSectionActive(true)}
-                        >Create Menu</button>
-                        <p className='text-red-600 text-xs'>*Unfortunately, you don't have a menu.</p>
+
+                    <div className={`orderCheckout px-3 ${formDataAPI?.orderExists == false ? 'flex' : 'hidden'}   flex-col w-full  max-w-[400px] items-center justify-center gap-5`}>
+                        <header className='w-full flex items-center justify-center'>
+                            <h1>Create Menu</h1>
+                        </header>
+                        <div className="orderCheckoutContent w-full  flex items-center justify-center flex-col gap-3">
+                            <button className='w-full text-white p-3 rounded-lg' onClick={() => setOrdersSectionActive(true)}
+                            >Create Menu</button>
+                            <p className='text-red-600 text-xs'>*Unfortunately, you don't have a menu.</p>
+                        </div>
                     </div>
-                </div>
-                <div className={`orderCheckout px-4 py-6 ${formDataAPI?.orderExists == true ? 'flex' : 'hidden'}  bg-white  flex-col w-full  max-w-[400px] items-center justify-center rounded-lg gap-3`}>
-                    <header className='w-full flex items-center justify-center'>
-                        <h1>Add order</h1>
-                    </header>
-                    <div className="orderCheckoutContent w-full  flex items-center justify-center flex-col gap-3">
-                        <button className='w-full text-white p-3 rounded-lg' onClick={() => setOrdersSectionActive(true)}
-                        >Add order</button>
+                    <div className={`orderCheckout px-4 py-6 ${formDataAPI?.orderExists == true ? 'flex' : 'hidden'}  bg-white  flex-col w-full  max-w-[400px] items-center justify-center rounded-lg gap-3`}>
+                        <header className='w-full flex items-center justify-center'>
+                            <h1>Add order</h1>
+                        </header>
+                        <div className="orderCheckoutContent w-full  flex items-center justify-center flex-col gap-3">
+                            <button className='w-full text-white p-3 rounded-lg' onClick={() => setOrdersSectionActive(true)}
+                            >Add order</button>
+                        </div>
                     </div>
-                </div>
-                <div className={`orders ${formDataAPI?.orderExists == true ? 'flex' : 'hidden'} mt-2 flex-col w-full w-full gap-2 p-3`}>
-                    <header className='flex flex-col '>
-                        <h1>Menu</h1>
-                    </header>
-                    <div className="ordersContent flex mt-5 flex-col w-full bg-white p-3  rounded-lg gap-2">
-                        {
-                            ordersForm.map((ordersFormMap, index) => (
-                                <div className={`orderCard  flex cursor-pointer items-center p-3  rounded-lg gap-5 ${orderCardActive === index? 'flex-col opacity-100!  items-start gap-0' : ''}`} key={index} onClick={() => setOrderCardActive(orderCardActive === index ? -1 : index)}>
-                                    <header className={`flex gap-3 items-center `}>
-                                        <img src={ordersFormMap.image} alt="order image" className='w-[60px] rounded-lg' />
-                                        <h2 className={`${orderCardActive === index? 'text-[17px]' :''}`}>{ordersFormMap.name}</h2>
-                                    </header>
-                                    <p className={`text-[16px] ${orderCardActive ===index? 'flex' : 'hidden'}`}>{ordersFormMap.description}</p>
-                                    <p className={` text-sm ${orderCardActive === index? 'text-left ml-0' : 'ml-auto text-right'}`}>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, }).format(ordersFormMap?.price ?? 0)}</p>
-                                </div>
-                            ))
-                        }
+                    <div className={`orders ${formDataAPI?.orderExists == true ? 'flex' : 'hidden'} mt-2 flex-col w-full  gap-2.5 p-3`}>
+                        <div className="ordersContent overflow-y-auto flex mt-5 h-[250px] flex-col w-full bg-white p-3 pt-1 max-w-[450px] m-auto rounded-lg gap-2">
+                            <header className='flex flex-col p-3 justify-center items-center text-center'>
+                                <h1>Menu</h1>
+                            </header>
+                            {
+                                ordersForm.map((ordersFormMap, index) => (
+                                    <div className={`orderCard  flex cursor-pointer items-center p-3  rounded-lg gap-5 ${orderCardActive === index ? 'flex-col opacity-100!  items-start gap-0' : ''}`} key={index} onClick={() => setOrderCardActive(orderCardActive === index ? -1 : index)}>
+                                        <header className={`flex gap-3 items-center `}>
+                                            <img src={ordersFormMap.image} alt="order image" className='w-[60px] rounded-lg' />
+                                            <h2 className={`${orderCardActive === index ? 'text-[17px]' : ''}`}>{ordersFormMap.name}</h2>
+                                        </header>
+                                        <p className={`text-[16px] ${orderCardActive === index ? 'flex' : 'hidden'}`}>{ordersFormMap.description}</p>
+                                        <p className={` text-sm ${orderCardActive === index ? 'text-left ml-0' : 'ml-auto text-right'}`}>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, }).format(ordersFormMap?.price ?? 0)}</p>
+                                    </div>
+                                ))
+                            }
+                        </div>
                     </div>
                 </div>
             </section>
             <Orders stateSection={state}
                 setOrdersSectionActive={setOrdersSectionActive}
                 OrdersSectionActive={ordersSectionActive}
-
+                ordersMetrics={ordersMetrics}
             />
         </>
     )

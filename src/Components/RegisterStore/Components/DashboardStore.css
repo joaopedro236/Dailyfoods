@@ -4,17 +4,20 @@
 }
 
 .headerDashboardStore,
-.orderCheckout button    {
+.orderCheckout button {
     background-color: var(--primary-red);
 }
+
 .orderCheckout {
     margin: 0 auto;
     margin-top: 50px;
 }
+
 .recharts-wrapper:focus,
 .recharts-surface:focus {
     outline: none;
 }
+
 .headerDashboardStore input {
     border: 1px solid rgba(0, 0, 0, 0);
 }
@@ -33,6 +36,7 @@
         justify-content: initial;
         align-items: initial;
     }
+
     .cardsContent_dashboardStore {
         gap: 10px;
     }
@@ -48,20 +52,35 @@
         min-height: 400px;
         padding-top: 40px;
         width: 100%;
-        grid-template-columns:1fr 1fr;
+        grid-template-columns: 1fr 1fr;
     }
+
     .orderCheckout {
         padding: 30px;
+        max-width: 450px;
         margin-left: 10px;
     }
-    .orderCheckout{
-        margin: 0;
+
+    .dashboardSide {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .orderCheckout,
+    .orders {
+        width: 100%;
         
     }
-    .cards_dashboardStore{
-        margin-top: 0px; padding-top: 0px;
+    .orders {
+        padding: 20px;
+        margin: 0;
     }
-    
+    .cards_dashboardStore {
+        margin-top: 0px;
+        padding-top: 0px;
+    }
+
     .headerDashboardStore,
     .dashboardStoreContent {
         margin: 0 auto;
@@ -74,6 +93,7 @@
     .orderCheckout button:hover {
         opacity: 0.85;
     }
+
     .orderCard:hover {
         opacity: 0.75;
     }

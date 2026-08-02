@@ -1,16 +1,20 @@
 import './SearchRestaurant.css'
+import Restaurant from './Components/Restaurant/RestaurantActive'
 import Filters_Restaurant from './Components/FiltersRestaurant'
 import { useState, useEffect } from 'react'
 import iconSearch from '../../assets/Icons/icons8-pesquisar-48.png'
+import { useCallback } from 'react'
 export default function SearchRestaurant({ state, setState }) {
     const [SearchActive, setSearchActive] = useState(false)
     const [searchValue, setSearchValue] = useState('')
+    const [selectedRestaurant, setSelectedRestaurant] = useState(null);
     const [filterOrdersExists, setFilterOrdersExists] = useState(false);
-    const [filterActive, setFilterActive] = useState(false )
+    const [filterActive, setFilterActive] = useState(false)
+    const [restaurantActive, setRestaurantActive] = useState(-1)
     const searchItems = searchValue.trim() !== '';
     const [apiResult, setApiResult] = useState([])
     const apiUrl = import.meta.env.VITE_API_URL
-    const apiCall = async () => {
+    const apiCall = useCallback(async () => {
         try {
             const response = await fetch(`${apiUrl}/api/restaurants`)
             const data = await response.json()
@@ -18,13 +22,13 @@ export default function SearchRestaurant({ state, setState }) {
         } catch (error) {
             console.error(error)
         }
-    }
+    },[apiUrl])
     const filteredRestaurants = apiResult
         .filter((restaurant) =>
             restaurant?.name.toLowerCase().includes(searchValue.toLowerCase())
-        )
+        )   
         .filter((restaurant) =>
-            filterOrdersExists ? restaurant.ordersExists : true
+            filterOrdersExists ? restaurant.orderExists : true
         )
 
 
@@ -35,15 +39,7 @@ export default function SearchRestaurant({ state, setState }) {
         }, 30000);
         return () => clearInterval(interval)
     }, [])
-    const apiFilters = async () => {
-        try {
-            const responseFilters = await fetch(`${apiUrl}/`)
-        }
-        catch (error) {
-            console.error(error)
-        }
-    }
-
+  
     return (
         <>
             <section className={`${state == 2 ? 'flex' : 'hidden'} w-full searchSection gap-2 flex-col pt-[60px] relative`}>
@@ -62,8 +58,16 @@ export default function SearchRestaurant({ state, setState }) {
                     <button className={`w-min duration-200 text-sm ${SearchActive ? 'Active' : ''}`} onClick={() => setFilterActive(prev => !prev)}>Filters</button>
                 </div>
                 <div className={`restaurants flex flex-col gap-4  relative`}>
-                    {filteredRestaurants.map((itemsRestaurantMap) => (
-                        <div className={`restaurant  px-5  py-2 cursor-pointer items-center gap-4 ${searchValue.trim() === '' || searchItems ? 'flex' : 'hidden'}`} key={itemsRestaurantMap.id}>
+                    {filteredRestaurants.map((itemsRestaurantMap, index) => (
+                        <div className={`restaurant  px-5  py-2 cursor-pointer items-center gap-4 ${searchValue.trim() === '' || searchItems ? 'flex' : 'hidden'}`} key={itemsRestaurantMap.id} onClick={() => {
+                            if (restaurantActive === index) {
+                                setRestaurantActive(-1);
+                                setSelectedRestaurant(null);
+                            } else {
+                                setRestaurantActive(index);
+                                setSelectedRestaurant(itemsRestaurantMap);
+                            }
+                        }}>
                             <img src={itemsRestaurantMap.image} alt="photo restaurant" className='w-[85px] rounded-lg' />
                             <h1>{itemsRestaurantMap.name}</h1>
                             <p className='ml-auto'>+</p>
@@ -72,6 +76,7 @@ export default function SearchRestaurant({ state, setState }) {
                     <p className={filteredRestaurants.length === 0 ? 'flex fixed top-[50%] left-[50%] -translate-1/2' : 'hidden'}>No results.</p>
                 </div>
                 <Filters_Restaurant stateSection={state} state={filterActive} filterOrdersExists={filterOrdersExists} setFilterOrdersExists={setFilterOrdersExists} apiResult={apiResult} setState={setFilterActive} />
+                <Restaurant restaurant={selectedRestaurant} setRestaurantActive={setRestaurantActive} restaurantActive={restaurantActive} />
             </section>
         </>
     )

@@ -3,10 +3,13 @@ import ItemsAside from './AsideJSON'
 import { useState, useEffect } from 'react'
 import iconConfig from '../../assets/Icons/icons8-config-50.png'
 import iconCloseAside from '../../assets/Icons/icons8-fechar-abas-no-painel-esquerdo-48.png'
-export default function Aside({ setState }) {
+export default function Aside({ setState, state }) {
     const [itemsAsideActive, setItemsAsideActive] = useState(1)
     const [asideActive, setAsideActive] = useState(true)
-   
+    useEffect(() => {
+
+        setItemsAsideActive(state)
+    }, [state])
     return (
         <>
             <section className={`aside w-52 hidden duration-300 fixed top-0 left-0 h-screen flex-col z-40 p-5 justify-between overflow-y-auto overflow-x-hidden ${asideActive ? '!w-20' : 'w-52'} z-20`}>

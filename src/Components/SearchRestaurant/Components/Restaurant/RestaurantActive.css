@@ -1,0 +1,14 @@
+.restaurantActive {
+    background-color: var(--section-background);
+}
+.restaurantActiveHeader {
+    background-color: var(--primary-red);
+}
+@media (hover:hover) {
+    .order_restaurantActive:hover {
+        opacity: 0.7;
+    }
+    .restaurantActiveContent header p:hover {
+        color: var(--primary-red);
+    }
+}

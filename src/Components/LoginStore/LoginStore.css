@@ -1,0 +1,13 @@
+.submit_loginStore {
+    
+
+    background-color: var(--primary-red);
+}
+.loginStore form input {
+    border: 1px solid var(--border);
+}
+@media (hover:hover ) {
+    .submit_loginStore:hover {
+        opacity: 0.8;
+    }
+}

@@ -31,6 +31,6 @@ const bottomNavbarItems = [
         id:5,
         name:'Account',
         image:iconAccount
-    },
+    }
 ]
 export default bottomNavbarItems

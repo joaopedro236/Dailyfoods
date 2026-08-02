@@ -15,7 +15,7 @@ export default function Navbar({ setState, state }) {
             const media = window.matchMedia('(max-width: 1024px)')
             if (window.scrollY > 56) {
                 setNavbarActive(true)
-               
+
 
             }
             else {
@@ -24,14 +24,18 @@ export default function Navbar({ setState, state }) {
         }
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
-    
+
     }, [])
+    useEffect(() => {
+        if (state === 5) setNavbarActive(true)
+        else setNavbarActive(false)
+    }, [state])
     return (
         <>
             <section className={`navbar duration-300 fixed w-full z-50 top-0 z-50 left-0 p-4 justify-between h-14  flex items-center ${navbarActive ? 'Active' : ''}`}>
                 <h1 className={`text-lg font-bold ${navbarActive ? 'text-white' : 'text-black'} duration-300`}>Dailyfood</h1>
                 <button className='btnMenu w-[20px] z-40 flex items-center justify-center h-min' onClick={() => setMenuActive(true)}>
-                    <img src={iconMenu} alt="icon Menu" className={`btnMenu duration-300 ${navbarActive ? 'invert-100' : 'invert-0'}`}  />
+                    <img src={iconMenu} alt="icon Menu" className={`btnMenu duration-300 ${navbarActive ? 'invert-100' : 'invert-0'}`} />
                 </button>
             </section>
             <section className={`menu fixed top-0 left-0 z-[60] w-full h-screen flex items-center p-10 duration-300 ${menuActive ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>

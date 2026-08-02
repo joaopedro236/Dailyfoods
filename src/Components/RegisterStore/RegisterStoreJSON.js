@@ -27,6 +27,15 @@
         type: 'text',
         minLength: 5,
         maxLength: 250
+    },
+    {
+        id:4,
+        name:'password',
+        placeholder:'Enter Your password',
+        label:'password',
+        type:'password',
+        minLength:10,
+        maxLength:200
     }
 ]
 

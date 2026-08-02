@@ -5,7 +5,7 @@ const ItemsNavbar = [
     },
     {
         id:2,
-        name:'Popular'
+        name:'Search'
     },
     
     
@@ -15,7 +15,7 @@ const ItemsNavbar = [
     },
     {
         id:4,
-        name:'Login'
+        name:'Login Store'
     },
     {
         id:5,
