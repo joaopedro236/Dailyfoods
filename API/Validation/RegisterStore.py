@@ -4,12 +4,14 @@ from ..Database.Config.connectDatabaseRestaurantConfig import connect_database
 
 router = APIRouter()
 
+
 class Orders(BaseModel):
-    orderImage: list[str]   = Field(default_factory=list)
+    orderImage: list[str] = Field(default_factory=list)
     orderName: str = Field(min_length=5, max_length=200)
     orderPrice: float = Field(default=0.0)
     orderDescription: str = Field(min_length=10, max_length=500)
     orderState: bool = Field(default=True)
+
     @classmethod
     def as_form_orders(
         cls,
@@ -26,16 +28,20 @@ class Orders(BaseModel):
             orderPrice=orderPrice,
             orderState=orderState,
         )
+
+
 class Store(BaseModel):
     name: str = Field(min_length=5, max_length=200)
-    CNPJ: str 
-    CEP: str  
+    CNPJ: str
+    CEP: str
     invoicing: float = Field(default=0.0)
     invoicing_history: list[float] = Field(default_factory=lambda: [0.0] * 7)
     orders: int = Field(default=0)
     completed: int = Field(default=0)
     progress: int = Field(default=0)
-    image: str  = Field(default='')  
+    image: str = Field(default="")
+    password: str
+    restauranttag:list[str]
     @field_validator("CNPJ")
     @classmethod
     def validationCNPJ(cls, value):
@@ -45,6 +51,7 @@ class Store(BaseModel):
         if not value.isdigit():
             raise ValueError("INVALID CNPJ")
         return value
+
     @classmethod
     def as_form(
         cls,
@@ -54,7 +61,8 @@ class Store(BaseModel):
         invoicing: float = Form(default=0.0),
         orders: int = Form(default=0),
         completed: int = Form(default=0),
-        progress: int = Form(default=0)
+        progress: int = Form(default=0),
+        password: str = Form(...),
     ):
         return cls(
             name=name,
@@ -64,7 +72,9 @@ class Store(BaseModel):
             orders=int(orders) if orders is not None else 0,
             completed=int(completed) if completed is not None else 0,
             progress=int(progress) if progress is not None else 0,
+            password=password,
         )
+
 
 @router.post("/api/registerStoreVerification")
 def register_store(data: Store = Depends(Store.as_form)):
@@ -72,13 +82,13 @@ def register_store(data: Store = Depends(Store.as_form)):
     cursor = None
     try:
         conn, cursor = connect_database()
-        
+
         commandSql = "SELECT * FROM restaurantConfig WHERE CNPJ = %s"
         cursor.execute(commandSql, (data.CNPJ,))
         result = cursor.fetchone()
-        
+
         cnpj_exists = result is not None
-        
+
         return {"cnpj": data.CNPJ, "cnpjExist": cnpj_exists}
 
     except Exception as e:
