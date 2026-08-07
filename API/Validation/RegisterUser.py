@@ -1,14 +1,18 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, field_validator, EmailStr
-from ..Database.Config.connectDatabaseUser import connect_database
+from ..Database.Config.connectDatabaseUser import connect_database_user
+
 router = APIRouter()
-class Store(BaseModel):
-    email:EmailStr
-    name:str
-    CNPJ:str
+
+
+class User(BaseModel):
+    email: EmailStr
+    name: str
+    CNPJ: str
     CEP: str
-    password:str
-    @field_validator('CNPJ')
+    password: str
+
+    @field_validator("CNPJ")
     @classmethod
     def validationCNPJ(cls, value):
         value = value.replace(".", "").replace("-", "").replace("/", "")
@@ -16,27 +20,24 @@ class Store(BaseModel):
             raise ValueError("Error: The CNPJ must have 14 digits.  ")
         if not value.isdigit():
             raise ValueError("INVALID CNPJ")
-        return value    
-    
+        return value
+
+
 @router.post("/api/registerUserVerification")
-def register_user_validation(data: Store):
+def register_user_validation(data: User):
     conn = None
     cursor = None
     try:
-        conn,cursor = connect_database()
-        commandSql = '''
-            SELECT 
-            EXISTS(SELECT 1 FROM users_Dailyfoods WHERE CNPJ = %s),
-            EXISTS(SELECT 1 FROM users_Dailyfoods WHERE email = %s)'''
-        cursor.execute(commandSql, (
-            data.CNPJ,
-            data.email
-        ))
-        result,resultEmail = cursor.fetchone()
-        return{
-            'CNPJExist': result,
-            'emailExists': resultEmail
-        }
+        conn, cursor = connect_database_user()
+        commandSql = """
+               SELECT
+EXISTS(SELECT 1 FROM users_Dailyfoods WHERE TRIM(CNPJ) = %s),
+EXISTS(SELECT 1 FROM users_Dailyfoods WHERE LOWER(TRIM(email)) = %s)
+"""
+        cursor.execute(commandSql, (data.CNPJ.strip(), data.email.strip().lower()))
+        result, resultEmail = cursor.fetchone()
+        
+        return {"CNPJExist": bool(result), "emailExists": bool(resultEmail)}
 
     except Exception as e:
         raise e

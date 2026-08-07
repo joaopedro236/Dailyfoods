@@ -10,7 +10,7 @@ DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 
 
-def connect_database():
+def connect_database_user():
     try:
         conn = psycopg2.connect(
             host=DB_HOST,

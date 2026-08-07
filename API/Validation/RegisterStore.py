@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Form, Depends
 from pydantic import BaseModel, Field, field_validator
 from ..Database.Config.connectDatabaseRestaurantConfig import connect_database
-
 router = APIRouter()
 
 
@@ -11,7 +10,7 @@ class Orders(BaseModel):
     orderPrice: float = Field(default=0.0)
     orderDescription: str = Field(min_length=10, max_length=500)
     orderState: bool = Field(default=True)
-
+    orderComments: list[str] = Field(default_factory=list)
     @classmethod
     def as_form_orders(
         cls,
@@ -20,6 +19,7 @@ class Orders(BaseModel):
         orderDescription: str = Form(...),
         orderPrice: float = Form(0.0),
         orderState: bool = Form(True),
+        orderComments:str =Form(...)
     ):
         return cls(
             orderImage=[orderImage],
@@ -27,6 +27,7 @@ class Orders(BaseModel):
             orderDescription=orderDescription,
             orderPrice=orderPrice,
             orderState=orderState,
+            orderComments=[orderComments]
         )
 
 
@@ -41,7 +42,7 @@ class Store(BaseModel):
     progress: int = Field(default=0)
     image: str = Field(default="")
     password: str
-    restauranttag:list[str]
+    restauranttag: list[str] = Field(default_factory=list)
     @field_validator("CNPJ")
     @classmethod
     def validationCNPJ(cls, value):
@@ -58,21 +59,22 @@ class Store(BaseModel):
         name: str = Form(...),
         CNPJ: str = Form(...),
         CEP: str = Form(...),
-        invoicing: float = Form(default=0.0),
-        orders: int = Form(default=0),
-        completed: int = Form(default=0),
-        progress: int = Form(default=0),
+        invoicing: float = Form(0.0),
+        orders: int = Form(0),
+        completed: int = Form(0),
+        progress: int = Form(0),
         password: str = Form(...),
+        restauranttag: str = Form(...),
     ):
         return cls(
             name=name,
             CNPJ=CNPJ,
             CEP=CEP,
-            invoicing=float(invoicing) if invoicing is not None else 0.0,
-            orders=int(orders) if orders is not None else 0,
-            completed=int(completed) if completed is not None else 0,
-            progress=int(progress) if progress is not None else 0,
-            password=password,
+            invoicing=float(invoicing),
+            orders=int(orders),
+            completed=int(completed),
+            progress=int(progress),
+            password=password
         )
 
 

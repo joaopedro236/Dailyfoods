@@ -8,8 +8,10 @@ from fastapi import (
     Depends,
     Request,
     File,
+    Header,
 )
 import uuid
+from ..Database.Config.connectDatabaseUser import connect_database_user
 import numpy as np
 from pathlib import Path
 from ..Validation.RegisterStore import Store, Orders
@@ -25,9 +27,10 @@ router = APIRouter()
 @router.post("/api/registerStore")
 async def register_store(
     response: Response,
-    request: Request,
     data: Store = Depends(Store.as_form),
+    image: UploadFile = File(None),
 ):
+
     conn = None
     cursor = None
     session_token = str(uuid.uuid4())
@@ -47,17 +50,15 @@ async def register_store(
     imageName = "219eaea67aafa864db091919ce3f5d82.jpg"
     image_url = f"http://localhost:8000/uploads/{imageName}"
     try:
-        form = await request.form()
-        image_file = form.get("image")
-        if image_file and image_file.filename:
-            imageName = await save_image(image_file, Uploads)
+        if image:
+            imageName = await save_image(image, Uploads)
 
         image_url = f"http://localhost:8000/uploads/{imageName}"
 
         invoicing_history = [0.0] * 7
         invoicing_history[dayWeek] = float(data.invoicing)
-
         try:
+
             conn, cursor = connect_database()
             cursor.execute(
                 "SELECT session_token FROM restaurantConfig WHERE CNPJ = %s",
@@ -70,17 +71,26 @@ async def register_store(
                     UPDATE restaurantConfig
                     SET 
                         image = %s
-                        
                     WHERE CNPJ = %s
-                """,
+                    """,
                     (imageName, data.CNPJ),
                 )
                 conn.commit()
+
+                response.set_cookie(
+                    key="restaurant_session_token",
+                    value=store[0],
+                    httponly=True,
+                    max_age=60 * 60 * 24 * 7,
+                    samesite="lax",
+                    path="/",
+                )
+
                 return {"Status": True, "token": store[0], "image": image_url}
             hash_password = ph.hash(data.password)
             command_sql = """ INSERT INTO restaurantConfig(name,image, CNPJ, CEP, session_token, invoicing, invoicing_history, orders, completed, progress, password, restauranttag)
                             VALUES (%s, %s,%s, %s, %s, %s, %s, %s ,%s, %s, %s, %s)"""
-            cursor.execute( 
+            cursor.execute(
                 command_sql,
                 (
                     data.name,
@@ -94,7 +104,7 @@ async def register_store(
                     data.completed,
                     data.progress,
                     hash_password,
-                    data.restauranttag
+                    data.restauranttag,
                 ),
             )
             conn.commit()
@@ -107,7 +117,8 @@ async def register_store(
                 value=session_token,
                 httponly=True,
                 max_age=60 * 60 * 24 * 7,
-                samesite="lax",
+                samesite="none",
+                secure=False,
                 path="/",
             )
             return {
@@ -151,17 +162,19 @@ async def register_store(
 def get_store(
     restaurant_session_token: str = Cookie(default=None),
     session_token: str = Cookie(default=None),
+    authorization: str = Header(default=None),
 ):
     dayWeek = datetime.today().weekday()
     conn = None
     cursor = None
-    token = restaurant_session_token or session_token
+    token = restaurant_session_token or session_token or authorization
+
     if token is None:
-        return {"Status": False}
+        return {"Status": False, "error": "none   token"}
     try:
         conn, cursor = connect_database()
         cursor.execute(
-            "SELECT name,image, CNPJ, CEP, invoicing, invoicing_history, orders, completed, progress, orderImage, orderName, orderPrice ,orderDescription, orderState, restauranttag FROM restaurantConfig WHERE session_token = %s",
+            "SELECT name,image, CNPJ, CEP, invoicing, invoicing_history, orders, completed, progress, orderImage, orderName, orderPrice ,orderDescription, orderState, restauranttag,restaurantComments FROM restaurantConfig WHERE session_token = %s",
             (token,),
         )
         store = cursor.fetchone()
@@ -226,7 +239,8 @@ def get_store(
                 "orderState": store[13],
                 "orderExists": orderExists,
                 "orderPriceMean": orderPriceMean,
-                "restauranttag": store[15]
+                "restauranttag": store[14],
+                "restaurantComments": store[15],
             }
         return {"Status": False}
     except Exception as e:
@@ -244,7 +258,7 @@ def restaurants():
     cursor = None
     try:
         conn, cursor = connect_database()
-        command_sql = """select id, name,image,cep,orderExists,orderImage, orderName, OrderPrice, OrderDescription,OrderState, restauranttag from restaurantConfig"""
+        command_sql = """select id, name,image,cep,orderExists,orderImage, orderName, OrderPrice, OrderDescription,OrderState, restauranttag,restaurantComments from restaurantConfig"""
         cursor.execute(command_sql)
         rows = cursor.fetchall()
         result = [
@@ -259,7 +273,8 @@ def restaurants():
                 "orderPrice": row[7],
                 "orderDescription": row[8],
                 "orderState": row[9],
-                "restauranttag": row[10]
+                "restauranttag": row[10],
+                "restaurantComments": row[11],
             }
             for row in rows
         ]
@@ -291,17 +306,16 @@ def update_metrics(data: Store):
         history[day] = float(data.invoicing)
         cursor.execute(
             """
+            
             UPDATE restaurantConfig
-            SET 
-                invoicing = %s,
-                invoicing_history = %s,
-                orders = %s,
-                completed = %s,
-                progress = %s
-            WHERE CNPJ = %s
+SET
+    invoicing_history = %s,
+    orders = %s,
+    completed = %s,
+    progress = %s
+WHERE CNPJ = %s
         """,
             (
-                data.invoicing,
                 history,
                 data.orders,
                 data.completed,
@@ -324,52 +338,56 @@ def update_metrics(data: Store):
             conn.close()
 
 
+from typing import Optional
+
+
 @router.post("/orders")
 async def orders(
-    restaurant_session_token: str = Cookie(default=None),
-    orderName: str = Form(),
-    orderDescription: str = Form(),
-    orderPrice: float = Form(),
-    image_orders: UploadFile = File(),
+    request: Request,
+    restaurant_session_token: str | None = Form(default=None),
+    orderName: Optional[str] = Form(None),
+    orderDescription: Optional[str] = Form(None),
+    orderPrice: Optional[float] = Form(None),
+    image_orders: UploadFile = File(None),
+    restaurantComments: Optional[str] = Form(None),
 ):
     conn = None
     cursor = None
+    token = restaurant_session_token or request.cookies.get("restaurant_session_token")
+
     try:
+
+        if not token:
+            return {"Status": False, "Error": "No restaurant session found"}
+
         UploadsOrders = Path(__file__).resolve().parents[2] / "UploadsOrders"
         UploadsOrders.mkdir(exist_ok=True)
+        if restaurantComments and not orderName:
+            conn, cursor = connect_database()
+
+            cursor.execute(
+                """
+                UPDATE restaurantConfig
+                SET restaurantComments = array_append(
+                    COALESCE(restaurantComments, ARRAY[]::text[]),
+                    %s
+                )
+                WHERE session_token = %s
+            """,
+                (restaurantComments, token),
+            )
+
+            conn.commit()
+            return {"Status": True}
+        if image_orders is None:
+            return {"Status": False, "Error": "No image provided"}
+
         extension = Path(image_orders.filename).suffix
         image_name = f"{uuid.uuid4().hex}{extension}"
 
         with open(UploadsOrders / image_name, "wb") as f:
             f.write(await image_orders.read())
-        conn, cursor = connect_database()
-        command_sql = """
-            UPDATE restaurantConfig
-            SET
-                orderImage = array_append(COALESCE(orderImage, ARRAY[]::text[]), %s),
-                orderName = array_append(COALESCE(orderName, ARRAY[]::text[]), %s),
-                orderPrice = array_append(COALESCE(orderPrice, ARRAY[]::numeric[]), %s),
-                orderDescription = array_append(COALESCE(orderDescription, ARRAY[]::text[]), %s),
-                orderState = array_append(COALESCE(orderState, ARRAY[]::boolean[]), %s),
-                orderExists = true
-            WHERE session_token = %s
-            """
-        cursor.execute(
-            command_sql,
-            (
-                image_name,
-                orderName,
-                orderPrice,
-                orderDescription,
-                False,
-                restaurant_session_token,
-            ),
-        )
-        conn.commit()
-        return {
-            "Status": True,
-            "image": f"http://localhost:8000/uploadsOrders/{image_name}",
-        }
+
     except Exception as e:
         if conn:
             conn.rollback()
@@ -382,10 +400,11 @@ async def orders(
 
 
 @router.get("/orders_items")
-def orders_items(restaurant_session_token: str = Cookie(default=None)):
+def orders_items(request: Request, restaurant_session_token: str | None = None):
     conn = None
     cursor = None
-    if not restaurant_session_token:
+    token = restaurant_session_token or request.cookies.get("restaurant_session_token")
+    if not token:
         return {"Status": False}
 
     try:
@@ -396,10 +415,11 @@ def orders_items(restaurant_session_token: str = Cookie(default=None)):
             orderName,
             orderPrice,
             orderDescription,
-            orderState
+            orderState,
+            restaurantComments
         FROM restaurantConfig
         WHERE session_token = %s"""
-        cursor.execute(command_sql, (restaurant_session_token,))
+        cursor.execute(command_sql, (token,))
         result = cursor.fetchone()
         if not result:
             return {"Status": False}
@@ -413,6 +433,7 @@ def orders_items(restaurant_session_token: str = Cookie(default=None)):
                     "price": result[2][i],
                     "description": result[3][i],
                     "state": result[4][i],
+                    "comments": result[5][i],
                 }
             )
 
@@ -444,11 +465,12 @@ def login_Store(data: LoginStore, response: Response):
             key="restaurant_session_token",
             value=restaurant[1],
             httponly=True,
-            max_age=60*60*24 *7,
-            samesite='lax',
-            path='/'
+            max_age=60 * 60 * 24 * 7,
+            samesite="lax",
+            secure=False,
+            path="/",
         )
-        return {"Status": True}
+        return {"Status": True, "token": restaurant[1]}
 
     except VerifyMismatchError:
         return {"Status": False}

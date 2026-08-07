@@ -1,6 +1,6 @@
 from pydantic import BaseModel, field_validator
 
-class LoginStore(BaseModel):
+class LoginUser(BaseModel):
     CNPJ: str
     password: str
     @field_validator("CNPJ")

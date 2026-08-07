@@ -1,4 +1,4 @@
-from ..Config.connectDatabaseUser import connect_database
+from ..Config.connectDatabaseUser import connect_database_user
 
 
 def create_database():

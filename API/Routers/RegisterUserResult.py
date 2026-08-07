@@ -1,14 +1,17 @@
 import requests
-from ..Database.Config.connectDatabaseUser import connect_database
+from ..Database.Config.connectDatabaseUser import connect_database_user
 from fastapi import APIRouter, Response, Cookie
-from ..Validation.RegisterUser import Store
+from ..Validation.RegisterUser import User
+from ..Validation.LoginUser import LoginUser
 import uuid
 from argon2 import PasswordHasher
-
+from argon2.exceptions import VerifyMismatchError
 router = APIRouter()
-ph=PasswordHasher()
+ph = PasswordHasher()
+
+
 @router.post("/api/registerUser")
-def register_user(data: Store, response: Response):
+def register_user(data: User, response: Response):
     conn = None
     cursor = None
     try:
@@ -16,7 +19,9 @@ def register_user(data: Store, response: Response):
         command_sql = """ INSERT INTO users_Dailyfoods(name_user,CNPJ,CEP,email, password, session_token)
                         VALUES (%s, %s, %s, %s, %s, %s)"""
         verification_response = requests.post(
-            "http://localhost:8000/api/registerUserVerification", json=data.model_dump(), timeout=5
+            "http://localhost:8000/api/registerUserVerification",
+            json=data.model_dump(),
+            timeout=5,
         )
 
         verification_response.raise_for_status()
@@ -25,7 +30,7 @@ def register_user(data: Store, response: Response):
         cnpj_exist = dataResponse["CNPJExist"]
         email_exist = dataResponse["emailExists"]
         if not cnpj_exist and not email_exist:
-            conn, cursor = connect_database()
+            conn, cursor = connect_database_user()
             hashPassword = ph.hash(data.password)
             session_token = str(uuid.uuid4())
             cursor.execute(
@@ -49,12 +54,11 @@ def register_user(data: Store, response: Response):
                 path="/",
             )
             return {"Status": True, "token": session_token}
-   
-        return {"StatusCnpj": cnpj_exist, "StatusEmail": email_exist, "token": None}
+        return {"Status": False, "StatusCnpj": cnpj_exist, "StatusEmail": email_exist}
     except Exception as e:
         if conn:
             conn.rollback()
-        raise e 
+        raise e
     finally:
         if cursor:
             cursor.close()
@@ -72,21 +76,52 @@ def get_user(
         return {"Status": False}
 
     try:
-        conn, cursor = connect_database()
+        conn, cursor = connect_database_user()
         cursor.execute(
             "SELECT name_user, email FROM users_Dailyfoods WHERE session_token = %s",
             (token,),
         )
-        user = cursor.fetchone()
-       
-        if user:
-            return {"Status": True, "name": user[0], "email": user[1]}
+        userData = cursor.fetchone()
+
+        if userData:
+            return {"Status": True, "name": userData[0], "email": userData[1]}
         return {"Status": False}
     except Exception as e:
-        raise e
         return {"Status": False, "Error": str(e)}
     finally:
         if cursor:
             cursor.close()
         if conn:
             conn.close()
+
+
+@router.post("/api/loginUser")
+def login_user(data: LoginUser, response: Response):
+    conn = None
+    cursor = None
+    try:
+        conn, cursor = connect_database_user()
+        cursor.execute(
+            "SELECT password, session_token FROM users_Dailyfoods WHERE CNPJ = %s",
+            (data.CNPJ,),
+        )
+        User = cursor.fetchone()
+        if not User:
+            return {"Status": False}
+        try:
+            ph.verify(User[0], data.password)
+        except VerifyMismatchError:
+            return {"Status": False}
+        response.set_cookie(
+            key="user_session_token",
+            value=User[1],
+            httponly=True,
+            max_age=60 * 60 * 24 * 7,
+            samesite="lax",
+            secure=False,
+            path="/",
+        )
+        return {"Status": True, "token": User[1]}
+       
+    except Exception as e:
+        return {"Error": e, "Status": False}

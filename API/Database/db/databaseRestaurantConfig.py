@@ -26,7 +26,9 @@ def create_databaseRC():
                 orderState BOOLEAN[] DEFAULT ARRAY[]::BOOLEAN[],
                 orderExists BOOLEAN[] DEFAULT ARRAY[false]::BOOLEAN[],
                 password TEXT NOT NULL,
-                restauranttag TEXT[] NOT NULL DEFAULT '{}'
+                restauranttag TEXT[] NOT NULL DEFAULT '{}',
+                restaurantNote DECIMAL(2,1) DEFAULT 5.0,
+                restaurantComments VARCHAR(500)[] DEFAULT ARRAY[]::VARCHAR(500)[]
                 )
         ''')
         conn.commit()
