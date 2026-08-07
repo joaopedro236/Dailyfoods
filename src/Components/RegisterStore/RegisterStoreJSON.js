@@ -35,7 +35,7 @@
         label:'password',
         type:'password',
         minLength:10,
-        maxLength:200
+        maxLength:200   
     }
 ]
 

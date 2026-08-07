@@ -10,24 +10,39 @@ export default function Orders({ stateSection, setOrdersSectionActive, OrdersSec
         const form = e.currentTarget
         const data = new FormData(form)
         const APIURL = import.meta.env.VITE_API_URL
+        const savedToken = localStorage.getItem('restaurant_session_token')
+        if (savedToken) {
+            data.append('restaurant_session_token', savedToken)
+        }
 
         const response = await fetch(`${APIURL}/orders`, {
             method: "POST",
             credentials: "include",
-            body: data
+            body: data,
+            redirect: 'follow'
         })
 
-        const dataResponse = await response.json()
-        if (dataResponse.Status) {
+        let dataResponse = null
+        try {
+            dataResponse = await response.json()
+        } catch (error) {
+            dataResponse = { Status: response.ok, Error: 'Invalid JSON response' }
+        }
+
+        if (response.ok && dataResponse?.Status !== false) {
             await refreshMetrics();
             setOrdersSectionActive(false);
+            return
         }
+
+        console.error('Create order failed', response.status, dataResponse)
+        alert(`Could not create the order. ${dataResponse?.Error || dataResponse?.detail || 'Please try again.'}`)
     }
     return (
         <>
             {OrdersSectionActive && (
 
-                <section className={`ordersCreate flex ${stateSection === 3 && OrdersSectionActive ? 'opacity-100 pointer-events-auto ' : 'opacity-0 pointer-events-none'} w-full h-screen px-4 flex-col absolute top-0 left-0 z-[90] gap-2`}>
+                <section className={`ordersCreate flex ${stateSection === 2 && OrdersSectionActive ? 'opacity-100 pointer-events-auto ' : 'opacity-0 pointer-events-none'} w-full h-screen px-4 flex-col absolute top-0 left-0 z-[90] gap-2`}>
                     <header className='flex items-center gap-[15px] py-4'>
                         <button className='font-bold text-[20px]' onClick={() => setOrdersSectionActive(false)}
                         >&lt;</button>  

@@ -3,6 +3,7 @@ import { useMediaQuery } from "react-responsive";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import iconBuy from '../../../assets/Icons/icons8-compras-do-saco-cheio-48.png'
 import iconDollar from '../../../assets/Icons/icons8-dólar-64.png'
+import iconNote from '../../../assets/Icons/icons8-nota-50.png'
 import Orders from './Orders/Orders'
 import iconPurchaseCompleted from '../../../assets/Icons/icons8-logística-64.png'
 import iconTime from '../../../assets/Icons/icons8-cronômetro-66.png'
@@ -21,10 +22,35 @@ function Card_DashboardStore(props) {
     )
 }
 export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nextStep, setNextStep, previewImage, setPreviewImage, onImageSelect }) {
-    const chartData = formDataAPI?.invoicing_history?.map((value, index) => ({
-        day: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index],
-        invoicing: value
-    }));
+    const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const rawHistory = formDataAPI?.invoicing_history;
+    const chartData = (() => {
+        const fallback = weekDays.map((day) => ({ day, invoicing: 0 }));
+
+        if (Array.isArray(rawHistory)) {
+            return rawHistory.map((value, index) => ({
+                day: weekDays[index] || `Day ${index + 1}`,
+                invoicing: Number(value ?? 0)
+            }));
+        }
+
+
+        if (typeof rawHistory === 'string') {
+            try {
+                const parsed = JSON.parse(rawHistory);
+                if (Array.isArray(parsed)) {
+                    return parsed.map((value, index) => ({
+                        day: weekDays[index] || `Day ${index + 1}`,
+                        invoicing: Number(value ?? 0)
+                    }));
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return fallback;
+    })();
     const [ordersSectionActive, setOrdersSectionActive] = useState(false)
     const isMobile = useMediaQuery({ maxWidth: 768 });
     const [inputFileActive, setInputFileActive] = useState(false)
@@ -94,7 +120,6 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
             }
             const data_updateMetrics = await response_updateMetrics.json()
 
-
         } catch (error) {
             console.error(error)
         }
@@ -111,14 +136,17 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
     const [ordersForm, setOrdersForm] = useState([])
     const ordersMetrics = async () => {
         try {
-            const responseOrders = await fetch(`${APIURL}/orders_items`, {
+            const savedToken = localStorage.getItem('restaurant_session_token')
+            const responseOrders = await fetch(`${APIURL}/orders_items${savedToken ? `?restaurant_session_token=${encodeURIComponent(savedToken)}` : ''}`, {
                 credentials: 'include'
             })
             if (!responseOrders) {
                 throw new Error(`Request error: ${responseOrders.status}`);
             }
             const jsonOrders = await responseOrders.json()
-            setOrdersForm(jsonOrders.orders || [])
+            const nextOrders = Array.isArray(jsonOrders?.orders) ? jsonOrders.orders : [];
+            setOrdersForm(nextOrders)
+
         } catch (error) {
             console.error(error)
         }
@@ -127,9 +155,10 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
         ordersMetrics()
     }, [])
     const [orderCardActive, setOrderCardActive] = useState(-1)
+    const showOrdersSection = nextStep === true && state === 3;
     return (
         <>
-            <section className={`dashboardStore ${nextStep == true && state == 3 && ordersSectionActive == false ? 'flex' : 'hidden'} w-full flex-col`}>
+            <section className={`dashboardStore ${nextStep == true && state == 2 && ordersSectionActive == false ? 'flex' : 'hidden'} w-full flex-col`}>
                 <header className='headerDashboardStore w-full text-white p-4 pt-7 flex flex-col items-center justify-center'>
                     <img src={currentImage} alt="photo hidden" className='cursor-pointer w-[110px] h-[110px] object-cover rounded-full' onClick={() => setInputFileActive(prev => !prev)} />
                     <h1 className='text-lg mt-2'>{formDataAPI?.name}</h1>
@@ -154,6 +183,7 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
                             <Card_DashboardStore title='Progress' formDataAPI={formDataAPI} icon={iconTime} formDataAPIName='progress' color='#9754B7' />
                         </div>
                     </div>
+
                     <div className="table_dashboardStore w-full  h-[300px] flex  gap-3 overflow-hidden px-2 flex-col">
                         <header className='w-full px-2 flex rounded-lg items-center justify-between '>
                             <h1>Performance</h1>
@@ -179,43 +209,49 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
                         </ResponsiveContainer>
                     </div>
 
-                    <div className={`orderCheckout px-3 ${formDataAPI?.orderExists == false ? 'flex' : 'hidden'}   flex-col w-full  max-w-[400px] items-center justify-center gap-5`}>
+                    <div className={`orderCheckout px-3 ${showOrdersSection ? 'flex' : 'hidden'} flex-col w-full max-w-[400px] items-center justify-center gap-5`}>
                         <header className='w-full flex items-center justify-center'>
-                            <h1>Create Menu</h1>
+                            <h1>{ordersForm.length > 0 ? 'Menu' : 'Create Menu'}</h1>
                         </header>
-                        <div className="orderCheckoutContent w-full  flex items-center justify-center flex-col gap-3">
-                            <button className='w-full text-white p-3 rounded-lg' onClick={() => setOrdersSectionActive(true)}
-                            >Create Menu</button>
-                            <p className='text-red-600 text-xs'>*Unfortunately, you don't have a menu.</p>
+                        <div className="orderCheckoutContent w-full flex items-center justify-center flex-col gap-3">
+                            <button className='w-full text-white p-3 rounded-lg' onClick={() => setOrdersSectionActive(true)}>
+                                {ordersForm.length > 0 ? 'Add order' : 'Create Menu'}
+                            </button>
+                            {ordersForm.length === 0 && <p className='text-red-600 text-xs'>*You don't have menu items yet.</p>}
                         </div>
                     </div>
-                    <div className={`orderCheckout px-4 py-6 ${formDataAPI?.orderExists == true ? 'flex' : 'hidden'}  bg-white  flex-col w-full  max-w-[400px] items-center justify-center rounded-lg gap-3`}>
-                        <header className='w-full flex items-center justify-center'>
-                            <h1>Add order</h1>
-                        </header>
-                        <div className="orderCheckoutContent w-full  flex items-center justify-center flex-col gap-3">
-                            <button className='w-full text-white p-3 rounded-lg' onClick={() => setOrdersSectionActive(true)}
-                            >Add order</button>
-                        </div>
-                    </div>
-                    <div className={`orders ${formDataAPI?.orderExists == true ? 'flex' : 'hidden'} mt-2 flex-col w-full  gap-2.5 p-3`}>
+                    <div className={`orders ${showOrdersSection ? 'flex' : 'hidden'} mt-2 flex-col w-full gap-2.5 p-3`}>
                         <div className="ordersContent overflow-y-auto flex mt-5 h-[250px] flex-col w-full bg-white p-3 pt-1 max-w-[450px] m-auto rounded-lg gap-2">
                             <header className='flex flex-col p-3 justify-center items-center text-center'>
                                 <h1>Menu</h1>
                             </header>
-                            {
-                                ordersForm.map((ordersFormMap, index) => (
-                                    <div className={`orderCard  flex cursor-pointer items-center p-3  rounded-lg gap-5 ${orderCardActive === index ? 'flex-col opacity-100!  items-start gap-0' : ''}`} key={index} onClick={() => setOrderCardActive(orderCardActive === index ? -1 : index)}>
-                                        <header className={`flex gap-3 items-center `}>
-                                            <img src={ordersFormMap.image} alt="order image" className='w-[60px] rounded-lg' />
-                                            <h2 className={`${orderCardActive === index ? 'text-[17px]' : ''}`}>{ordersFormMap.name}</h2>
-                                        </header>
-                                        <p className={`text-[16px] ${orderCardActive === index ? 'flex' : 'hidden'}`}>{ordersFormMap.description}</p>
-                                        <p className={` text-sm ${orderCardActive === index ? 'text-left ml-0' : 'ml-auto text-right'}`}>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, }).format(ordersFormMap?.price ?? 0)}</p>
-                                    </div>
-                                ))
-                            }
+                            {ordersForm.length === 0 ? (
+                                <p className='text-center text-sm text-gray-500 py-4'>No orders yet.</p>
+                            ) : ordersForm.map((ordersFormMap, index) => (
+                                <div className={`orderCard flex cursor-pointer items-center p-3 rounded-lg gap-5 ${orderCardActive === index ? 'flex-col opacity-100! items-start gap-0' : ''}`} key={index} onClick={() => setOrderCardActive(orderCardActive === index ? -1 : index)}>
+                                    <header className='flex gap-3 items-center'>
+                                        <img src={ordersFormMap.image} alt="order image" className='w-[60px] rounded-lg' />
+                                        <h2 className={`${orderCardActive === index ? 'text-[17px]' : ''}`}>{ordersFormMap.name}</h2>
+                                    </header>
+                                    <p className={`text-[16px] ${orderCardActive === index ? 'flex' : 'hidden'}`}>{ordersFormMap.description}</p>
+                                    <p className={`text-sm ${orderCardActive === index ? 'text-left ml-0' : 'ml-auto text-right'}`}>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(ordersFormMap?.price ?? 0)}</p>
+                                </div>
+                            ))}
                         </div>
+                    </div>
+                </div>
+                <div className="comments_dashboard flex flex-col min-h-[250px] gap-3 p-3  w-full  m-auto rounded-lg bg-white max-w-[450px]">
+                    <header className='mx-auto'>
+                        <h1>Comments</h1>
+                    </header>
+                    <div className="grid grid-cols-2 gap-2 justify-items-center">
+                        {
+                            formDataAPI?.restaurantComments?.map((comment, index) => (
+                                <div key={index} className="comment_dashboard flex flex-col gap-2">
+                                    <p>{comment}</p>
+                                </div>
+                            ))
+                        }
                     </div>
                 </div>
             </section>

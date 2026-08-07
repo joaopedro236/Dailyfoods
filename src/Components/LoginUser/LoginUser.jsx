@@ -1,14 +1,15 @@
-import './LoginStore.css'
-import { useEffect, useState } from 'react'
-export default function LoginStore({ state, setState, setNextStep, setFormDataAPI }) {
-    const APIURL = import.meta.env.VITE_API_URL
-    const [CNPJ, setCNPJ] = useState("");
+import './LoginUser.css'
+import { useState, useEffect } from 'react'
 
-    const [password, setPassword] = useState("");
-    const handleLogin = async (e) => {
+export default function LoginUser({ state, setState, setUser, setNextStep }) {
+    const [CNPJ, setCNPJ] = useState("")
+    const [password, setPassword] = useState("")
+    const [formDataAPI, setFormDataAPI] = useState({})
+    const APIURL = import.meta.env.VITE_API_URL
+    const handleForm = async (e) => {
         e.preventDefault()
         try {
-            const response = await fetch(`${APIURL}/api/loginStore`, {
+            const response = await fetch(`${APIURL}/api/loginUser`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -19,64 +20,54 @@ export default function LoginStore({ state, setState, setNextStep, setFormDataAP
                     password,
                 }),
             });
-
-            const data = await response.json();
+            const data = await response.json()
             if (data.Status) {
-
                 if (data.token) {
                     localStorage.setItem(
-                        'restaurant_session_token',
+                        'user_session_token',
                         data.token
                     )
                 }
+                const userResponse = await fetch(`${APIURL}/api/user`, {
+                    credentials: "include",
+                    headers: {
+                        Authorization: data.token,
+                    },
+                });
+                const userData = await userResponse.json();
 
-                const storeResponse = await fetch(`${APIURL}/api/store`, {
-                    credentials: "include"
-                })
-
-                const storeData = await storeResponse.json()
-
-                if (storeData.Status) {
-                    setFormDataAPI(storeData)
-
-                    alert("Login successful!")
-
-                    setState(2)
-                    setNextStep(true)
-                } else {
-                    console.error("STORE ERROR:", storeData)
+                if (userData.Status) {
+                    setUser(userData);
                 }
-
-            } else {
-                alert("Invalid CNPJ or password");
-
+                setState(5)
+                setNextStep(true)
+                setUser(true)
             }
-        }
-        catch (error) {
+        } catch (error) {
             console.error(error)
         }
     }
     return (
         <>
-            <section className={`loginStore flex-col p-3 pt-[80px] w-full gap-[30px]  h-screen justify-center ${state == 4 ? 'flex' : 'hidden'} ${status ? 'items-center' : ''}`}>
-                <header className={` flex-col `}>
-                    <h1>Login Restaurant</h1>
+            <section className={`loginUser ${state == 3 ? 'flex' : 'hidden'} bg-white w-full h-screen p-3 pt-[90px] justify-center flex-col gap-7`}>
+                <header>
+                    <h1>Login User</h1>
                 </header>
-                <form onSubmit={handleLogin} className={`flex flex-col gap-6`}>
+                <form className={`flex flex-col gap-6`} onSubmit={handleForm}>
                     <input
                         type="text"
                         className='p-3 rounded-[10px] w-full max-w-[600px]'
-                        placeholder="CNPJ"
                         value={CNPJ}
                         onChange={(e) => setCNPJ(e.target.value)}
+                        placeholder="CNPJ"
                     />
 
                     <input
                         type="password"
                         placeholder="Senha"
                         value={password}
-                        className='p-3 rounded-[10px] w-full max-w-[600px]'
                         onChange={(e) => setPassword(e.target.value)}
+                        className='p-3 rounded-[10px] w-full max-w-[600px]'
                     />
                     <p className='text-sm text-blue-600 cursor-pointer'>I forgot the password.</p>
                     <button type="submit" className='submit_loginStore p-3 rounded-lg text-white '>
@@ -84,7 +75,6 @@ export default function LoginStore({ state, setState, setNextStep, setFormDataAP
                     </button>
                 </form>
             </section>
-
         </>
     )
 }

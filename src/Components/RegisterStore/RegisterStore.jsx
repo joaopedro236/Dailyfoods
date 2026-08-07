@@ -16,7 +16,7 @@ function Input(props) {
         </>
     )
 }
-export default function RegisterStore({ state, nextStepTwo }) {
+export default function RegisterStore({ state, nextStepTwo, formDataAPI, setFormDataAPI }) {
     const [submitActive, setSubmitActive] = useState(false)
     const [cnpjError, setCnpjError] = useState(false)
     const [nextStep, setNextStep] = useState(false)
@@ -25,10 +25,10 @@ export default function RegisterStore({ state, nextStepTwo }) {
         CNPJ: '',
         CEP: '',
         password: '',
-        image: null
+        image: null,
+        restaurantNote: 0
     })
     const [previewImage, setPreviewImage] = useState(null)
-    const [formDataAPI, setFormDataAPI] = useState({})
     const handleFormEdit = (event) => {
         const { name, value } = event.target
         setFormData(prev => ({
@@ -71,7 +71,6 @@ export default function RegisterStore({ state, nextStepTwo }) {
             const form = new FormData()
             const imageInput = event.currentTarget?.querySelector('input[name="image"]')
             const selectedImage = imageInput?.files?.[0] ?? formData.image ?? null
-
             setFormData(prev => ({ ...prev, image: selectedImage }))
             const tags = selectedCategories.map(item => item.value);
             form.append("name", formData.name)
@@ -98,13 +97,17 @@ export default function RegisterStore({ state, nextStepTwo }) {
                 return false
             }
             setCnpjError(false)
+            if (json?.token) {
+                localStorage.setItem('restaurant_session_token', json.token)
+            }
             setFormDataAPI(prev => ({
                 ...prev,
                 name: formData.name,
                 CNPJ: formData.CNPJ,
                 CEP: formData.CEP,
                 password: formData.password,
-                image: json.image || previewImage || prev.image
+                image: json.image || previewImage || prev.image,
+                restaurantNote: formData.restaurantNote
             }))
             try {
                 await APICall()
@@ -145,13 +148,18 @@ export default function RegisterStore({ state, nextStepTwo }) {
                     orders: jsonCall.orders,
                     completed: jsonCall.completed,
                     progress: jsonCall.progress,
-                    orderExists: jsonCall.orderExists,
-                    password: formData.password
+                    orderExists: jsonCall.orderExists ?? false,
+                    restauranttag: jsonCall.restauranttag ?? [],
+                    password: formData.password,
+                    restaurantNote: formData.restaurantNote
                 })
                 setNextStep(true)
                 return
             }
-            setNextStep(false)
+
+            if (!formDataAPI?.CNPJ && !formDataAPI?.name) {
+                setNextStep(false)
+            }
         }
 
         catch (error) {
@@ -160,17 +168,17 @@ export default function RegisterStore({ state, nextStepTwo }) {
         }
     }
     useEffect(() => {
+        if (state !== 3) return
+
+        if (formDataAPI?.CNPJ || formDataAPI?.name) return
+
         APICall()
-        return () => {
-            if (previewImage?.startsWith('blob:')) {
-                URL.revokeObjectURL(previewImage)
-            }
-        }
     }, [state])
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const shouldShowDashboard = nextStep === true || Boolean(formDataAPI?.CNPJ || formDataAPI?.name);
     return (
         <>
-            <section className={`registerStore w-full  min-h-screen  z-30 px-4 py-2 pt-[90px] items-center justify-center ${state === 3 && nextStep == false ? 'flex' : 'hidden'} `}>
+            <section className={`registerStore w-full  min-h-screen  z-30 px-4 py-2 pt-[90px] items-center justify-center ${state === 3 && !shouldShowDashboard ? 'flex' : 'hidden'} `}>
                 <div className=" card__registerStore w-full max-w-[930px]  h-min flex  gap-6 rounded-[16px]  items-center justify-center px-3">
                     <div className="cardContent w-full  flex flex-col gap-6 h-min">
                         <header className='flex flex-col text-center items-center justify-center'>
@@ -183,10 +191,9 @@ export default function RegisterStore({ state, nextStepTwo }) {
                                 e.preventDefault()
                                 if (submitActive) return
                                 setSubmitActive(true);
-                                try {
-                                    const success = await handleForm(e)
 
-                                    await APICall()
+                                try {
+                                    await handleForm(e)
                                 } catch (error) {
                                     console.error(error)
                                 }
@@ -255,7 +262,7 @@ export default function RegisterStore({ state, nextStepTwo }) {
                 </div>
             </section>
 
-            <DashboardStore formDataAPI={formDataAPI} setFormDataAPI={setFormDataAPI} nextStep={nextStep} setNextStep={setNextStep} state={state} previewImage={previewImage} setPreviewImage={setPreviewImage} onImageSelect={updateSelectedImage} />
+            <DashboardStore formDataAPI={formDataAPI} setFormDataAPI={setFormDataAPI} nextStep={shouldShowDashboard} setNextStep={setNextStep} state={state} previewImage={previewImage} setPreviewImage={setPreviewImage} onImageSelect={updateSelectedImage} />
         </>
     )
 }

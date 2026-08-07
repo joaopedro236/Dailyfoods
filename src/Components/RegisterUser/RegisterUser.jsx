@@ -3,12 +3,11 @@ import { useState, useEffect } from 'react'
 import RegisterNSComponent from './Components/RegisterNS/RegisterNS'
 import PhotoBackground from '../../assets/Photos/Gemini_Generated_Image_b7rt8lb7rt8lb7rt.png'
 
-export default function Login({ state }) {
+export default function Login({ state,nextStep, setNextStep, user, setUser}) {
     const [submitActive, setSubmitActive] = useState(false)
     const [emailExists, setEmailExists] = useState(false)
     const [CNPJExists, setCNPJExists] = useState(false)
-    const [nextStep, setNextStep] = useState(false)
-    const [user, setUser] = useState(false)
+
     const [formData, setFormData] = useState({
         email: '',
         name: '',

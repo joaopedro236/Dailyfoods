@@ -13,7 +13,7 @@ export default function Navbar({ setState, state }) {
         const handleScroll = () => {
             const body = document.body
             const media = window.matchMedia('(max-width: 1024px)')
-            if (window.scrollY > 56) {
+            if (window.scrollY > 36) {
                 setNavbarActive(true)
 
 

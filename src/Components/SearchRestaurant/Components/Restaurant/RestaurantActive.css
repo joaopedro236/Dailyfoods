@@ -1,7 +1,8 @@
 .restaurantActive {
     background-color: var(--section-background);
 }
-.restaurantActiveHeader {
+.restaurantActiveHeader,
+.submitComment {
     background-color: var(--primary-red);
 }
 @media (hover:hover) {

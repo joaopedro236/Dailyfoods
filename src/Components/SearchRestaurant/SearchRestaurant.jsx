@@ -1,6 +1,5 @@
 import './SearchRestaurant.css'
 import Restaurant from './Components/Restaurant/RestaurantActive'
-import Filters_Restaurant from './Components/FiltersRestaurant'
 import { useState, useEffect } from 'react'
 import iconSearch from '../../assets/Icons/icons8-pesquisar-48.png'
 import { useCallback } from 'react'
@@ -18,18 +17,27 @@ export default function SearchRestaurant({ state, setState }) {
         try {
             const response = await fetch(`${apiUrl}/api/restaurants`)
             const data = await response.json()
-            setApiResult(data.result)
+            const nextResult = Array.isArray(data?.result)
+                ? data.result
+                : Array.isArray(data)
+                    ? data
+                    : []
+            setApiResult(nextResult)
         } catch (error) {
             console.error(error)
+            setApiResult([])
         }
     },[apiUrl])
-    const filteredRestaurants = apiResult
+    const filteredRestaurants = Array.isArray(apiResult)
+        ? apiResult.filter((restaurant) =>
+            restaurant?.name?.toLowerCase().includes(searchValue.toLowerCase())
+        )
+        
+        : []
         .filter((restaurant) =>
             restaurant?.name.toLowerCase().includes(searchValue.toLowerCase())
         )   
-        .filter((restaurant) =>
-            filterOrdersExists ? restaurant.orderExists : true
-        )
+        
 
 
     useEffect(() => {
@@ -38,11 +46,11 @@ export default function SearchRestaurant({ state, setState }) {
             apiCall()
         }, 30000);
         return () => clearInterval(interval)
-    }, [])
+    }, [apiCall])
   
     return (
         <>
-            <section className={`${state == 2 ? 'flex' : 'hidden'} w-full searchSection gap-2 flex-col pt-[60px] relative`}>
+            <section className={`${state ==1 ? 'flex' : 'hidden'} w-full searchSection gap-2 flex-col pt-[60px] relative`}>
                 <header className='w-full flex px-3 relative justify-center'>
                     <div className='relative w-full max-w-[500px]'>
                         <label htmlFor="search" className='absolute top-[50%] -translate-y-1/2 left-3'>
@@ -54,9 +62,7 @@ export default function SearchRestaurant({ state, setState }) {
                             }`} onChange={(e) => setSearchValue(e.target.value)} />
                     </div>
                 </header>
-                <div className="filters_search flex flex-col w-full items-end  px-3">
-                    <button className={`w-min duration-200 text-sm ${SearchActive ? 'Active' : ''}`} onClick={() => setFilterActive(prev => !prev)}>Filters</button>
-                </div>
+               
                 <div className={`restaurants flex flex-col gap-4  relative`}>
                     {filteredRestaurants.map((itemsRestaurantMap, index) => (
                         <div className={`restaurant  px-5  py-2 cursor-pointer items-center gap-4 ${searchValue.trim() === '' || searchItems ? 'flex' : 'hidden'}`} key={itemsRestaurantMap.id} onClick={() => {
@@ -75,7 +81,6 @@ export default function SearchRestaurant({ state, setState }) {
                     ))}
                     <p className={filteredRestaurants.length === 0 ? 'flex fixed top-[50%] left-[50%] -translate-1/2' : 'hidden'}>No results.</p>
                 </div>
-                <Filters_Restaurant stateSection={state} state={filterActive} filterOrdersExists={filterOrdersExists} setFilterOrdersExists={setFilterOrdersExists} apiResult={apiResult} setState={setFilterActive} />
                 <Restaurant restaurant={selectedRestaurant} setRestaurantActive={setRestaurantActive} restaurantActive={restaurantActive} />
             </section>
         </>
