@@ -1,42 +1,152 @@
 # 🍔 Dailyfoods
 
-**Dailyfoods** is a food delivery web application inspired by **iFood**, built to practice and demonstrate full-stack web development concepts.
+<p align="center">
+  <img src="./assets/banner.png" alt="Dailyfoods Banner" width="100%">
+</p>
 
-## 🚀 Technologies
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react">
+  <img src="https://img.shields.io/badge/FastAPI-0.116-009688?logo=fastapi">
+  <img src="https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql">
+  <img src="https://img.shields.io/badge/TailwindCSS-4-06B6D4?logo=tailwindcss">
+  <img src="https://img.shields.io/badge/License-MIT-green">
+</p>
 
-* React
-* HTML5
-* CSS3
-* Tailwind CSS
-* JavaScript
-* Python
-* FastAPI
-* PostgreSQL
+---
 
-## 📌 About the Project
+# 📖 About
 
-Dailyfoods is a full-stack application that simulates a modern food delivery platform. The project focuses on creating a responsive, intuitive, and scalable user experience while integrating a robust backend and database.
+Dailyfoods is a full-stack food delivery application inspired by iFood.
 
-## ✨ Features
+The project was developed to practice modern web development concepts using **React**, **FastAPI**, and **PostgreSQL**, focusing on authentication, restaurant management, order visualization and responsive UI.
 
-* Responsive user interface
-* Restaurant and menu browsing
-* User authentication
-* FastAPI REST API
-* PostgreSQL database integration
-* Modern component-based architecture with React
+---
 
-## 🎯 Purpose
 
-This project was developed to improve my skills in frontend and backend development, REST APIs, database design, and modern web application architecture.
+# ✨ Features
 
-## Application Flow
+- ✅ User Authentication
+- ✅ Restaurant Registration
+- ✅ Dynamic Menu
+- ✅ Image Upload
+- ✅ Order Management
+- ✅ Comments
+- ✅ Responsive Design
+- ✅ Cookie Authentication
+- ✅ PostgreSQL Database
 
-1. Frontend sends user data to the backend.
-2. Backend receives and validates the data types (string, array, etc.).
-3. Backend checks if the user has a profile photo.
-4. If the user has no photo, a default image is assigned.
-5. All information is stored in the database.
-6. Authentication cookies are created.
-7. Backend sends the processed data back to the frontend.
-8. Frontend receives and displays the information.
+---
+
+# 🏗 Architecture
+
+```
+                React
+                  │
+                  ▼
+             FastAPI API
+                  │
+                  ▼
+            PostgreSQL Database
+```
+
+---
+
+# 🛠 Technologies & Tools
+
+<div align="center">
+
+<img src="https://skillicons.dev/icons?i=react,js,python,fastapi,postgres,html,css,tailwind,git,github,vscode"/>
+
+</div>
+
+---
+
+# 📂 Project Structure
+
+```
+Dailyfoods
+│
+├── API
+│   ├── Database
+│   ├── Routers
+│   ├── Validation
+│   └── main.py
+│
+├── src
+│   ├── Components
+│   ├── StylesGlobals
+│   ├── Assets
+│
+├── Uploads
+└── README.md
+```
+
+---
+
+# 🚀 Getting Started
+
+## Clone
+
+```bash
+git clone https://github.com/SEU-USUARIO/Dailyfoods.git
+```
+
+## Backend
+
+```bash
+cd API
+
+python -m venv .venv
+
+pip install -r requirements.txt
+
+uvicorn main:app --reload
+```
+
+## Frontend
+
+```bash
+npm install
+
+npm run dev
+```
+
+---
+
+#
+
+# 🔄 Application Flow
+
+```mermaid
+graph LR
+
+A[React] --> B[FastAPI]
+
+B --> C[Validation]
+
+C --> D[Authentication]
+
+D --> E[PostgreSQL]
+
+E --> F[Response]
+
+F --> A
+```
+
+---
+
+# 🎯 Learning Objectives
+
+- REST APIs
+- Authentication
+- React Context
+- File Upload
+- PostgreSQL
+- Responsive UI
+- Component Architecture
+
+---
+
+# 👨‍💻 Author
+
+João Pedro 
