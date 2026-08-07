@@ -1,8 +1,5 @@
 # 🍔 Dailyfoods
 
-<p align="center">
-  <img src="./assets/banner.png" alt="Dailyfoods Banner" width="100%">
-</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react">
