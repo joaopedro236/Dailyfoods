@@ -13,3 +13,25 @@
         color: var(--primary-red);
     }
 }
+@media (min-width:1024px) {
+
+    .restaurantActiveContent {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        align-items: start;
+    }
+
+    .restaurantActiveContent > header {
+        grid-column: 1 / -1;
+    }
+
+    .orders_restaurantActive {
+        grid-column: 1;
+    }
+
+    .comments {
+        grid-column: 2;
+    }
+
+}

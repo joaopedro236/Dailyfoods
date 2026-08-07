@@ -6,8 +6,46 @@
 .loginStore form input {
     border: 1px solid var(--border);
 }
-@media (hover:hover ) {
+@media (hover: hover) {
     .submit_loginStore:hover {
-        opacity: 0.8;
+        opacity: 85%;
+    }
+}
+
+@media (min-width: 510px) {
+    .loginStore form {
+        max-width: 400px;
+    }
+
+    .loginStore header h1 {
+        font-size: 24px;
+    }
+}
+
+@media (min-width: 768px) {
+    .loginStore {
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loginStore form {
+        width: 350px;
+    }
+
+    .loginStore input,
+    .submit_loginStore {
+        height: 45px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .loginStore {
+        padding-right: 50px;
+    }
+
+    .loginStore form,
+    .loginStore header {
+        width: 400px;
     }
 }

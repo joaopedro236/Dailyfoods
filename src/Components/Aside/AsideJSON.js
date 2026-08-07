@@ -14,7 +14,7 @@ const bottomNavbarItems = [
     
     {
         id:2,
-        name:'Create',
+        name:'Restaurant',
         image:iconCreate
     },
     {

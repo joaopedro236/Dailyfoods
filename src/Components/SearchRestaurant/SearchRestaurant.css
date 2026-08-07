@@ -14,11 +14,22 @@
 
 @media (hover:hover) {
     .restaurant:hover {
-        background-color: rgba(88, 88, 88, 0.091);
+        background-color: rgba(88, 88, 88, 0.052);
         opacity: 0.9;
     }
 
     .filters_search button:hover {
         color: var(--primary-red);
+    }
+}
+@media (min-width: 1024px) {
+    .restaurants {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(400px, 550px));
+        justify-content: center;
+        gap: 20px;
+    }
+    .restaurant {
+        border-radius: 15px;
     }
 }

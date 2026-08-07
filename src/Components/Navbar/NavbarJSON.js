@@ -7,7 +7,7 @@ const ItemsNavbar = [
     
     {
         id:2,
-        name:'Create'
+        name:'Restaurant'
     },
     {
         id:3,

@@ -1,3 +1,46 @@
 .loginUser input {
     border: 1px solid var(--border);
 }
+@media (hover: hover) {
+    .submit_loginStore:hover {
+        opacity: 85%;
+    }
+}
+
+@media (min-width: 510px) {
+    .loginUser form {
+        max-width: 400px;
+    }
+
+    .loginUser header h1 {
+        font-size: 24px;
+    }
+}
+
+@media (min-width: 768px) {
+    .loginUser {
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loginUser form {
+        width: 350px;
+    }
+
+    .loginUser input,
+    .submit_loginStore {
+        height: 45px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .loginUser {
+        padding-right: 50px;
+    }
+
+    .loginUser form,
+    .loginUser header {
+        width: 400px;
+    }
+} 
