@@ -4,7 +4,8 @@
 }
 
 .headerDashboardStore,
-.orderCheckout button {
+.orderCheckout button,
+.addMoney button {
     background-color: var(--primary-red);
 }
 
@@ -90,7 +91,8 @@
 }
 
 @media (hover:hover) {
-    .orderCheckout button:hover {
+    .orderCheckout button:hover,
+    .addMoney button:hover {
         opacity: 0.85;
     }
 

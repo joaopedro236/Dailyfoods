@@ -22,8 +22,3 @@ span{
 p, span {
   font-weight: 400;
 }
-@media (min-width:1024px) {
-    body {
-        padding-left:80px;
-    }
-}

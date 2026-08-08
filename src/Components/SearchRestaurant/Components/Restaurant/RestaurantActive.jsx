@@ -1,5 +1,5 @@
 import './RestaurantActive.css'
-import { useState } from 'react'
+import { useState} from 'react'
 export default function Restaurant({ restaurant, restaurantActive, setRestaurantActive }) {
     if (!restaurant) return null
     const orders = restaurant.orderName.map((name, index) => ({
@@ -62,11 +62,13 @@ export default function Restaurant({ restaurant, restaurantActive, setRestaurant
                         <button onClick={sendComment} className='submitComment text-white rounded-lg p-3'>Send</button>
                         <h1>Comments</h1>
 
-                        <div className='comment flex flex-col gap-3 ' >
+                        <div className='comment flex flex-col gap-3  bg-white w-full max-w-[600px] p-5 rounded-lg    overflow-auto h-[300px]' >
                             {
                                 restaurant?.restaurantComments.map((comments, index) => (
-
-                                    <p key={index}>{comments}</p>
+                                    <div key={index} className='flex gap-2 items-center'>
+                                        <p className=' text-gray-700'>{index}</p>
+                                        <p>{comments}</p>
+                                    </div>
                                 ))
                             }
                         </div>

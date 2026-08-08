@@ -7,15 +7,7 @@
     }
 }
 
-@media (min-width: 510px) {
-    .loginUser form {
-        max-width: 400px;
-    }
 
-    .loginUser header h1 {
-        font-size: 24px;
-    }
-}
 
 @media (min-width: 768px) {
     .loginUser {
@@ -41,6 +33,6 @@
 
     .loginUser form,
     .loginUser header {
-        width: 400px;
+        width: 460px;
     }
 } 

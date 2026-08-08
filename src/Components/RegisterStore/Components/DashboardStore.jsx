@@ -155,7 +155,39 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
         ordersMetrics()
     }, [])
     const [orderCardActive, setOrderCardActive] = useState(-1)
-    const showOrdersSection = nextStep === true && state === 3;
+    const showOrdersSection = nextStep === true && state === 2;
+    const addMoney = async () => {
+        try {
+            const responseMoney = await fetch(`${APIURL}/addMoney`, {
+                method: 'POST',
+                credentials: 'include'
+            })
+            if (!responseMoney) {
+                throw new Error(`Request error: ${responseMoney.status}`);
+            }
+            const dataMoney = await responseMoney.json()
+            if (!dataMoney.Status) {
+                throw new Error(dataMoney.Error || 'Could not add money');
+            }
+
+
+            setFormDataAPI(prev => ({
+                ...prev,
+                invoicing: dataMoney.result,
+                invoicing_history: (() => {
+                    const history = [...(prev.invoicing_history || [])];
+                    const today = new Date().getDay();
+                    const index = today === 0 ? 6 : today - 1;
+
+                    history[index] = dataMoney.result;
+
+                    return history;
+                })()
+            }));
+        } catch (error) {
+            console.error(error)
+        }
+    }
     return (
         <>
             <section className={`dashboardStore ${nextStep == true && state == 2 && ordersSectionActive == false ? 'flex' : 'hidden'} w-full flex-col`}>
@@ -239,22 +271,29 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
                             ))}
                         </div>
                     </div>
-                </div>
-                <div className="comments_dashboard flex flex-col min-h-[250px] gap-3 p-3  w-full  m-auto rounded-lg bg-white max-w-[450px]">
-                    <header className='mx-auto'>
-                        <h1>Comments</h1>
-                    </header>
-                    <div className="grid grid-cols-2 gap-2 justify-items-center">
-                        {
-                            formDataAPI?.restaurantComments?.map((comment, index) => (
-                                <div key={index} className="comment_dashboard flex flex-col gap-2">
-                                    <p>{comment}</p>
-                                </div>
-                            ))
-                        }
+
+                    <div className="comments_dashboard flex  flex-col min-h-[250px] gap-3 p-3  w-full  m-auto rounded-lg bg-white max-w-[450px]">
+                        <header className='mx-auto'>
+                            <h1>Comments</h1>
+                        </header>
+                        <div className="grid grid-cols-2 gap-2 justify-items-center">
+                            {
+                                formDataAPI?.restaurantComments?.map((comment, index) => (
+                                    <div key={index} className="comment_dashboard flex flex-col gap-2">
+                                        <p>{comment}</p>
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    </div>
+                    <div className="addMoney flex flex-col h-[200px] gap-5 p-3 w-full m-auto rounded-lg  max-w-[450px]">
+                        <header className='mx-auto'>
+                            <h1>To Add Money</h1>
+                        </header>
+                        <button className='text-white w-full rounded-lg p-4' onClick={addMoney}>To Add</button>
                     </div>
                 </div>
-            </section>
+            </section >
             <Orders stateSection={state}
                 setOrdersSectionActive={setOrdersSectionActive}
                 OrdersSectionActive={ordersSectionActive}

@@ -388,6 +388,26 @@ async def orders(
         with open(UploadsOrders / image_name, "wb") as f:
             f.write(await image_orders.read())
 
+        conn, cursor = connect_database()
+
+        cursor.execute(
+            """
+            UPDATE restaurantConfig
+            SET
+                orderImage = array_append(COALESCE(orderImage, ARRAY[]::text[]), %s),
+orderName = array_append(COALESCE(orderName, ARRAY[]::text[]), %s),
+orderPrice = array_append(COALESCE(orderPrice, ARRAY[]::double precision[]), %s),
+orderDescription = array_append(COALESCE(orderDescription, ARRAY[]::text[]), %s),
+orderState = array_append(COALESCE(orderState, ARRAY[]::boolean[]), %s)
+            WHERE session_token = %s
+        """,
+            (image_name, orderName, orderPrice, orderDescription, True, token),
+        )
+
+        conn.commit()
+
+        return {"Status": True}
+
     except Exception as e:
         if conn:
             conn.rollback()
@@ -479,3 +499,33 @@ def login_Store(data: LoginStore, response: Response):
             cursor.close()
         if conn:
             conn.close()
+
+
+@router.post("/addMoney")
+def add_money(request: Request):
+    conn = None
+    cursor = None
+    token = request.cookies.get("restaurant_session_token")
+    if not token:
+        return {"Status": False, "Error": "No restaurant session found"}
+    try:
+        conn, cursor = connect_database()
+        cursor.execute(
+            """
+            UPDATE restaurantConfig
+    SET invoicing = invoicing + 100
+    WHERE session_token = %s
+    RETURNING invoicing
+            """,
+            (token,),
+        )
+        result = cursor.fetchone()
+        if not result:
+            return {"Status": False, "Error": "Restaurant not found"}
+        conn.commit()
+        return {"Status":True , "result": result[0]}
+    except Exception as e:
+        return {"Status": False, "Error": str(e)}
+    finally:
+        cursor.close()
+        conn.close()

@@ -1,11 +1,16 @@
 import './SearchRestaurant.css'
 import Restaurant from './Components/Restaurant/RestaurantActive'
 import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import iconSearch from '../../assets/Icons/icons8-pesquisar-48.png'
 import { useCallback } from 'react'
 export default function SearchRestaurant({ state, setState }) {
+    const { restaurantId } = useParams()
+    const navigate = useNavigate()
+    
     const [SearchActive, setSearchActive] = useState(false)
     const [searchValue, setSearchValue] = useState('')
+    
     const [selectedRestaurant, setSelectedRestaurant] = useState(null);
     const [filterOrdersExists, setFilterOrdersExists] = useState(false);
     const [filterActive, setFilterActive] = useState(false)
@@ -23,11 +28,21 @@ export default function SearchRestaurant({ state, setState }) {
                     ? data
                     : []
             setApiResult(nextResult)
+            if (restaurantId) {
+    const restaurant = nextResult.find(
+        item => Number(item.id) === Number(restaurantId)
+    )
+
+    if (restaurant) {
+        setSelectedRestaurant(restaurant)
+        setRestaurantActive(0)
+    }
+}
         } catch (error) {
             console.error(error)
             setApiResult([])
         }
-    },[apiUrl])
+    },[apiUrl, restaurantId])
     const filteredRestaurants = Array.isArray(apiResult)
         ? apiResult.filter((restaurant) =>
             restaurant?.name?.toLowerCase().includes(searchValue.toLowerCase())
@@ -47,10 +62,15 @@ export default function SearchRestaurant({ state, setState }) {
         }, 30000);
         return () => clearInterval(interval)
     }, [apiCall])
-  
+  useEffect(() => {
+    if (!restaurantId) {
+        setRestaurantActive(-1)
+        setSelectedRestaurant(null)
+    }
+}, [restaurantId])
     return (
         <>
-            <section className={`${state ==1 ? 'flex' : 'hidden'} w-full searchSection gap-2 flex-col pt-[60px] relative`}>
+            <section className={`${state ==1 ? 'flex' : 'hidden'} w-full searchSection gap-5 flex-col pt-[60px] relative`}>
                 <header className='w-full flex px-3 relative justify-center'>
                     <div className='relative w-full max-w-[500px]'>
                         <label htmlFor="search" className='absolute top-[50%] -translate-y-1/2 left-3'>
@@ -66,14 +86,11 @@ export default function SearchRestaurant({ state, setState }) {
                 <div className={`restaurants flex flex-col gap-4  relative`}>
                     {filteredRestaurants.map((itemsRestaurantMap, index) => (
                         <div className={`restaurant  px-5  py-2 cursor-pointer items-center gap-4 ${searchValue.trim() === '' || searchItems ? 'flex' : 'hidden'}`} key={itemsRestaurantMap.id} onClick={() => {
-                            if (restaurantActive === index) {
-                                setRestaurantActive(-1);
-                                setSelectedRestaurant(null);
-                            } else {
-                                setRestaurantActive(index);
-                                setSelectedRestaurant(itemsRestaurantMap);
-                            }
-                        }}>
+    setRestaurantActive(index)
+    setSelectedRestaurant(itemsRestaurantMap)
+
+    navigate(`/restaurant/${itemsRestaurantMap.id}`)
+}}>
                             <img src={itemsRestaurantMap.image} alt="photo restaurant" className='w-[85px] rounded-lg' />
                             <h1>{itemsRestaurantMap.name}</h1>
                             <p className='ml-auto'>+</p>

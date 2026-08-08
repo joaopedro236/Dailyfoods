@@ -178,7 +178,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
     const shouldShowDashboard = nextStep === true || Boolean(formDataAPI?.CNPJ || formDataAPI?.name);
     return (
         <>
-            <section className={`registerStore w-full  min-h-screen  z-30 px-4 py-2 pt-[90px] items-center justify-center ${state === 3 && !shouldShowDashboard ? 'flex' : 'hidden'} `}>
+            <section className={`registerStore w-full  min-h-screen  z-30 px-4 py-2 pt-[90px] items-center justify-center ${state === 2 && !shouldShowDashboard ? 'flex' : 'hidden'} `}>
                 <div className=" card__registerStore w-full max-w-[930px]  h-min flex  gap-6 rounded-[16px]  items-center justify-center px-3">
                     <div className="cardContent w-full  flex flex-col gap-6 h-min">
                         <header className='flex flex-col text-center items-center justify-center'>

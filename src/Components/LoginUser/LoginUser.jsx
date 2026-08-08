@@ -53,10 +53,10 @@ export default function LoginUser({ state, setState, setUser, setNextStep }) {
                 <header>
                     <h1>Login User</h1>
                 </header>
-                <form className={`flex flex-col gap-6`} onSubmit={handleForm}>
+                <form className={`flex flex-col gap-6 w-full`} onSubmit={handleForm}>
                     <input
                         type="text"
-                        className='p-3 rounded-[10px] w-full max-w-[600px]'
+                        className='p-3 rounded-[10px] w-full'
                         value={CNPJ}
                         onChange={(e) => setCNPJ(e.target.value)}
                         placeholder="CNPJ"
@@ -67,7 +67,7 @@ export default function LoginUser({ state, setState, setUser, setNextStep }) {
                         placeholder="Senha"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className='p-3 rounded-[10px] w-full max-w-[600px]'
+                        className='p-3 rounded-[10px] w-full '
                     />
                     <p className='text-sm text-blue-600 cursor-pointer'>I forgot the password.</p>
                     <button type="submit" className='submit_loginStore p-3 rounded-lg text-white '>
