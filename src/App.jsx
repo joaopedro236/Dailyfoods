@@ -6,6 +6,7 @@ import RegisterStore from './Components/RegisterStore/RegisterStore'
 import RegisterUser from './Components/RegisterUser/RegisterUser'
 import SearchRestaurant from "./Components/SearchRestaurant/SearchRestaurant"
 import LoginStore from "./Components/LoginStore/LoginStore"
+import Chatbot from './Components/Chatbot/Chatbot'
 import LoginUser from './Components/LoginUser/LoginUser'
 import { useState, useEffect } from "react"
 function App() {
@@ -88,6 +89,7 @@ function App() {
       <RegisterUser nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setState={setAsideOrNavbarItems} />
       <LoginStore state={asideOrNavbarItems} setNextStep={setNextStep} setState={setAsideOrNavbarItems} setFormDataAPI={setFormDataAPI} />
       <LoginUser nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setNextStep={setNextStep} setState={setAsideOrNavbarItems} />
+      <Chatbot/>
     </>
   )
 }

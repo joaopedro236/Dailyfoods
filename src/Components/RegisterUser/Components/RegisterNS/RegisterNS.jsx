@@ -2,7 +2,7 @@ import './RegisterNS.css'
 import User from '../User/User'
 import inputs from './InputsJSON'
 import { useState, useEffect } from 'react'
-export default function RegisterNS({ user, setUser, state, setState, handleForm, formData, handleFormEdit, stateSection, CNPJExists }) {
+export default function RegisterNS({ user,nameInvalid, setUser, state, setState, handleForm, formData, handleFormEdit, stateSection, CNPJExists }) {
     const [submitActive, setSubmitActive] = useState(false)
     const [userData, setUserData] = useState({})
     const APIURL = import.meta.env.VITE_API_URL
@@ -68,6 +68,7 @@ export default function RegisterNS({ user, setUser, state, setState, handleForm,
                             ))
                         }
                         <p className={`text-red-700 text-sm ${CNPJExists ? 'flex' : 'hidden'}`}>CNPJ exists</p>
+                        <p className={`text-red-700 text-sm ${nameInvalid ? 'flex' : 'hidden'}`}>Unable to validate name.</p>
                         <p className='text-gray-600 text-xs'>To adjust, go back to the previous screen.</p>
                         < input type="submit" disabled={submitActive} value={submitActive ? "Loading..." : "Required data is missing."} className={`submit__registerStore  text-white rounded-[12px] p-3 mt-2 cursor-pointer w-full  ${submitActive ? 'opacity-85' : ''}`} />
                     </form>

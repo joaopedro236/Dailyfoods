@@ -277,13 +277,20 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
                             <h1>Comments</h1>
                         </header>
                         <div className="grid grid-cols-2 gap-2 justify-items-center">
-                            {
-                                formDataAPI?.restaurantComments?.map((comment, index) => (
-                                    <div key={index} className="comment_dashboard flex flex-col gap-2">
-                                        <p>{comment}</p>
+                            {formDataAPI?.restaurantComments?.length > 0 ? (
+                                formDataAPI.restaurantComments.map((comment, index) => (
+                                    <div
+                                        key={index}
+                                        className="comment_dashboard flex flex-col gap-2"
+                                    >
+                                        <p>{comment || 'None'}</p>
                                     </div>
                                 ))
-                            }
+                            ) : (
+                                <div className="col-span-2 flex w-full items-center justify-center">
+                                    <p>None</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="addMoney flex flex-col h-[200px] gap-5 p-3 w-full m-auto rounded-lg  max-w-[450px]">

@@ -59,7 +59,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
             setPreviewImage(null)
         }
     }
-
+    const [nameInvalid, setNameInvalid] = useState(false)
     const handleFileChange = (event) => {
         const file = event.target.files?.[0] ?? null
         updateSelectedImage(file)
@@ -91,11 +91,22 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
             if (!response.ok) {
                 return false
             }
-            if (json.Status == false) {
-                setCnpjError(true)
+            if (json.Status === false) {
                 setNextStep(false)
+
+                if (json.Error === "Invalid name.") {
+                    setNameInvalid(true)
+                }
+
+                if (json.Error === "CNPJ already exists.") {
+                    setCnpjError(true)
+                }
+
                 return false
             }
+
+            setCnpjError(false)
+            setNameInvalid(false)
             setCnpjError(false)
             if (json?.token) {
                 localStorage.setItem('restaurant_session_token', json.token)
@@ -250,7 +261,13 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
 
                                 </div>
                                 <input type="submit" value={`${submitActive ? 'Loading' : 'Sign up Now'}`} className={`submit__registerStore  text-white rounded-[12px] p-3 cursor-pointer w-full ${submitActive ? 'opacity-85' : ''}`} />
-                                <p className={`text-sm text-red-700 ${cnpjError ? 'flex' : 'hidden'}`}>This CNPJ is already in use.</p>
+                                <p className={`text-sm text-red-700 ${cnpjError ? 'flex' : 'hidden'}`}>
+                                    This CNPJ is already in use.
+                                </p>
+
+                                <p className={`text-sm text-red-700 ${nameInvalid ? 'flex' : 'hidden'}`}>
+                                    Invalid restaurant name.
+                                </p>
                             </form>
                         </div>
                     </div>

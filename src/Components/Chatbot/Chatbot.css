@@ -1,0 +1,7 @@
+.chatBotBtn {
+    background-color: var(--primary-red);
+}
+.chatBot {
+    border: 1px solid var(--border);
+    box-shadow: 0px 0px 10px var(--border);
+}

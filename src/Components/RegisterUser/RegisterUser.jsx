@@ -7,7 +7,7 @@ export default function Login({ state,nextStep, setNextStep, user, setUser}) {
     const [submitActive, setSubmitActive] = useState(false)
     const [emailExists, setEmailExists] = useState(false)
     const [CNPJExists, setCNPJExists] = useState(false)
-
+    const[nameInvalid, setNameInvalid] = useState(false)
     const [formData, setFormData] = useState({
         email: '',
         name: '',
@@ -23,7 +23,7 @@ export default function Login({ state,nextStep, setNextStep, user, setUser}) {
             [name]: value
         }))
     }
-    const apiURL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const apiURL = import.meta.env.VITE_API_URL 
 
     useEffect(() => {
         const restoreSession = async () => {
@@ -77,8 +77,11 @@ export default function Login({ state,nextStep, setNextStep, user, setUser}) {
                 return false
             }
             setCNPJExists(false)
-
-
+            if (json?.Error === 'Unable to validate  name.'){
+                setNameInvalid(true)
+                return false
+            }
+            setNameInvalid(false)
             return true
 
         } catch (error) {
@@ -113,7 +116,7 @@ export default function Login({ state,nextStep, setNextStep, user, setUser}) {
                     <p className='text-sm text-gray-600'>By continuing, you agree to receive communications from Dailyfoods.</p>
                 </div>
             </section>
-            <RegisterNSComponent state={nextStep} CNPJExists={CNPJExists} user={user} setUser={setUser} stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
+            <RegisterNSComponent state={nextStep} CNPJExists={CNPJExists} user={user} setUser={setUser} nameInvalid stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
 
         </>
     )

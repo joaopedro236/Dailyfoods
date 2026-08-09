@@ -1,5 +1,5 @@
 import './RestaurantActive.css'
-import { useState} from 'react'
+import { useState } from 'react'
 export default function Restaurant({ restaurant, restaurantActive, setRestaurantActive }) {
     if (!restaurant) return null
     const orders = restaurant.orderName.map((name, index) => ({
@@ -10,20 +10,36 @@ export default function Restaurant({ restaurant, restaurantActive, setRestaurant
         state: restaurant.orderState[index],
         comments: restaurant.restaurantComments
     }))
+    const [loading, setLoading] = useState(false)
     const [orderActive, setOrderActive] = useState(-1)
     const [comment, setComment] = useState('')
+    const [comments, setComments] = useState(restaurant.restaurantComments || [])
     const sendComment = async () => {
+        if (!comment.trim()) return
         const formData = new FormData();
-
+        formData.append("restaurantId", restaurant.id);
         formData.append("restaurantComments", comment);
-
-        await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
+        setLoading(true)
+        try{
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
             method: "POST",
             credentials: "include",
             body: formData,
-        });
-
+        })
+        const data = await response.json()
+        if (data.Status) {
+            setComments(prev => [...prev, comment]);
+            setComment("");
+        }
+        else {
+            alert(data.Error);
+        }
         setComment("");
+    } catch (error){
+        console.error(error)
+    }finally{
+        setLoading(false)
+    }
     };
     return (
         <>
@@ -59,14 +75,15 @@ export default function Restaurant({ restaurant, restaurantActive, setRestaurant
                             placeholder='Write your comment...'
                             className='rounded-lg bg-white p-4 '
                         />
-                        <button onClick={sendComment} className='submitComment text-white rounded-lg p-3'>Send</button>
+
+                        <button onClick={sendComment} disabled={loading} className='submitComment text-white rounded-lg p-3'>{loading ? "Loading..." : "Send"}</button>
                         <h1>Comments</h1>
 
                         <div className='comment flex flex-col gap-3  bg-white w-full max-w-[600px] p-5 rounded-lg    overflow-auto h-[300px]' >
                             {
-                                restaurant?.restaurantComments.map((comments, index) => (
+                                comments.map((comments, index) => (
                                     <div key={index} className='flex gap-2 items-center'>
-                                        <p className=' text-gray-700'>{index}</p>
+                                        <p className=' text-gray-700'>{index + 1}</p>
                                         <p>{comments}</p>
                                     </div>
                                 ))
