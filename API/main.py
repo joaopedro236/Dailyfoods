@@ -5,6 +5,7 @@ from API.Validation.RegisterUser import router as registerUser_verification
 from API.Routers.RegisterStoreResult import router as registerStore_result
 from API.Routers.RegisterUserResult import router as registerUser_result
 from API.Validation.GarbageUpload import garbage_upload 
+from API.Routers.chatbot import router as chatbot
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
@@ -34,6 +35,7 @@ app.include_router(registerStore_verification)
 app.include_router(registerStore_result)
 app.include_router(registerUser_verification)
 app.include_router(registerUser_result)
+app.include_router(chatbot)
 @app.on_event('startup')
 def startup():
     create_database()

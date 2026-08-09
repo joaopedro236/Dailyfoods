@@ -1,3 +1,4 @@
+
 from ..Database.Config.connectDatabaseRestaurantConfig import connect_database
 from fastapi import (
     APIRouter,
@@ -11,11 +12,13 @@ from fastapi import (
     Header,
 )
 import uuid
+
 from ..Database.Config.connectDatabaseUser import connect_database_user
 import numpy as np
 from pathlib import Path
 from ..Validation.RegisterStore import Store, Orders
 from datetime import datetime
+import ollama
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from ..Validation.LoginStore import LoginStore
@@ -50,6 +53,33 @@ async def register_store(
     imageName = "219eaea67aafa864db091919ce3f5d82.jpg"
     image_url = f"http://localhost:8000/uploads/{imageName}"
     try:
+        try:
+            PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "restaurantName.txt"
+                        
+            with open(PROMPT_PATH, "r", encoding="utf-8") as file:
+                prompt = file.read()
+            moderation = ollama.chat(
+                model="llama3.2:3b",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": prompt,
+                    },
+                    {"role": "user", "content": data.name},
+                ],
+                options={"temperature": 0},
+            )
+
+            result = moderation["message"]["content"].strip().upper()
+            
+            if "BLOCK" in result:
+                return {"Status": False, "Error": "Invalid restaurant name."}
+        except Exception as e:
+            return {
+                "Status": False,
+                "Error": "Unable to validate restaurant name.",
+                "ErrorGross": str(e),
+            }
         if image:
             imageName = await save_image(image, Uploads)
 
@@ -107,26 +137,12 @@ async def register_store(
                     data.restauranttag,
                 ),
             )
-            conn.commit()
+            cojnn.commit()
         except Exception as db_error:
             if conn:
                 conn.rollback()
-            image_url = image_url or f"http://localhost:8000/uploads/{imageName}"
-            response.set_cookie(
-                key="restaurant_session_token",
-                value=session_token,
-                httponly=True,
-                max_age=60 * 60 * 24 * 7,
-                samesite="none",
-                secure=False,
-                path="/",
-            )
-            return {
-                "Status": True,
-                "token": session_token,
-                "image": image_url,
-                "warning": str(db_error),
-            }
+
+            return {"Status": False, "Error": "Unable to register restaurant."}
 
         response.set_cookie(
             key="restaurant_session_token",
@@ -344,7 +360,7 @@ from typing import Optional
 @router.post("/orders")
 async def orders(
     request: Request,
-    restaurant_session_token: str | None = Form(default=None),
+    restaurantId: int = Form(...),
     orderName: Optional[str] = Form(None),
     orderDescription: Optional[str] = Form(None),
     orderPrice: Optional[float] = Form(None),
@@ -353,12 +369,35 @@ async def orders(
 ):
     conn = None
     cursor = None
-    token = restaurant_session_token or request.cookies.get("restaurant_session_token")
-
+    token = request.cookies.get("restaurant_session_token")
     try:
-
-        if not token:
-            return {"Status": False, "Error": "No restaurant session found"}
+        try:
+            PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "comments.txt"           
+            with open(PROMPT_PATH, "r", encoding="utf-8") as file:
+                prompt = file.read()
+                moderation = ollama.chat(
+                    model="llama3.2:3b",
+                    messages=[
+                        {
+                                "role": "system",
+                                "content": prompt,
+                            },
+                            {"role": "user", "content": restaurantComments},
+                        ],
+                        options={"temperature": 0},
+                    )
+        
+            result = moderation["message"]["content"].strip().upper()
+                    
+            if result == "BLOCK":
+                return {"Status": False, "Error": "Invalid comment."}
+        except Exception as e:
+                return {
+                        "Status": False,
+                        "Error": "Unable to validate restaurant name.",
+                        "ErrorGross": str(e),
+                    }
+       
 
         UploadsOrders = Path(__file__).resolve().parents[2] / "UploadsOrders"
         UploadsOrders.mkdir(exist_ok=True)
@@ -372,9 +411,9 @@ async def orders(
                     COALESCE(restaurantComments, ARRAY[]::text[]),
                     %s
                 )
-                WHERE session_token = %s
+                WHERE id= %s
             """,
-                (restaurantComments, token),
+                (restaurantComments, restaurantId),
             )
 
             conn.commit()
@@ -523,7 +562,7 @@ def add_money(request: Request):
         if not result:
             return {"Status": False, "Error": "Restaurant not found"}
         conn.commit()
-        return {"Status":True , "result": result[0]}
+        return {"Status": True, "result": result[0]}
     except Exception as e:
         return {"Status": False, "Error": str(e)}
     finally:

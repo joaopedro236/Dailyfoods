@@ -4,8 +4,11 @@ from fastapi import APIRouter, Response, Cookie
 from ..Validation.RegisterUser import User
 from ..Validation.LoginUser import LoginUser
 import uuid
+import ollama
+from pathlib import Path
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+
 router = APIRouter()
 ph = PasswordHasher()
 
@@ -26,7 +29,33 @@ def register_user(data: User, response: Response):
 
         verification_response.raise_for_status()
         dataResponse = verification_response.json()
+        try:
+            PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "nameUser.txt"
+            
+            with open(PROMPT_PATH, "r", encoding="utf-8") as file:
+                prompt = file.read()
+            moderation = ollama.chat(
+                model="llama3.2:3b",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": prompt,
+                    },
+                    {"role": "user", "content": data.name},
+                ],
+                options={"temperature": 0},
+            )
 
+            result = moderation["message"]["content"].strip().upper()
+
+            if result.startswith("BLOCK"):
+                return {"Status": False, "Error": "Invalid name."}
+        except Exception as e:
+            return {
+                "Status": False,
+                "Error": "Unable to validate  name.",
+                "ErrorGross": str(e),
+            }
         cnpj_exist = dataResponse["CNPJExist"]
         email_exist = dataResponse["emailExists"]
         if not cnpj_exist and not email_exist:
@@ -122,6 +151,6 @@ def login_user(data: LoginUser, response: Response):
             path="/",
         )
         return {"Status": True, "token": User[1]}
-       
+
     except Exception as e:
         return {"Error": e, "Status": False}
