@@ -1,6 +1,5 @@
 # 🍔 Dailyfoods
 
-
 <p align="center">
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react">
   <img src="https://img.shields.io/badge/FastAPI-0.116-009688?logo=fastapi">
@@ -19,31 +18,27 @@ The project was developed to practice modern web development concepts using **Re
 
 ---
 
-
 # ✨ Features
 
-- ✅ User Authentication
-- ✅ Restaurant Registration
-- ✅ Dynamic Menu
-- ✅ Image Upload
-- ✅ Order Management
-- ✅ Comments
-- ✅ Responsive Design
-- ✅ Cookie Authentication
-- ✅ PostgreSQL Database
+* ✅ User Authentication
+* ✅ Restaurant Registration
+* ✅ Dynamic Menu
+* ✅ Image Upload
+* ✅ Order Management
+* ✅ Comments
+* ✅ Responsive Design
+* ✅ Cookie Authentication
+* ✅ PostgreSQL Database
 
 ---
 
 # 🏗 Architecture
 
-```
-                React
-                  │
-                  ▼
-             FastAPI API
-                  │
-                  ▼
-            PostgreSQL Database
+```mermaid
+flowchart LR
+    A[⚛️ React] --> B[🚀 FastAPI]
+    B --> C[🐍 Python]
+    B --> D[(🐘 PostgreSQL)]
 ```
 
 ---
@@ -60,7 +55,7 @@ The project was developed to practice modern web development concepts using **Re
 
 # 📂 Project Structure
 
-```
+```text
 Dailyfoods
 │
 ├── API
@@ -73,7 +68,7 @@ Dailyfoods
 ├── src
 │   ├── Components
 │   ├── StylesGlobals
-│   ├── Assets
+│   └── Assets
 │
 ├── Uploads
 └── README.md
@@ -111,41 +106,48 @@ npm run dev
 
 ---
 
-#
-
 # 🔄 Application Flow
 
 ```mermaid
-graph LR
+flowchart LR
+    A[👤 Usuário] --> B[⚛️ React]
+    B --> C[🚀 FastAPI]
+    C --> D[🔐 Validação]
+    D --> E[(🐘 PostgreSQL)]
+    E --> F[📤 Response]
+    F --> B
+```
 
-A[React] --> B[FastAPI]
+---
 
-B --> C[Validation]
+# 🛒 Order Flow
 
-C --> D[Authentication]
-
-D --> E[PostgreSQL]
-
-E --> F[Response]
-
-F --> A
+```mermaid
+flowchart TD
+    A[👤 Cliente] --> B[🍔 Restaurante]
+    B --> C[📋 Cardápio]
+    C --> D[🛒 Adicionar ao pedido]
+    D --> E[💳 Finalizar pedido]
+    E --> F[🚀 FastAPI]
+    F --> G[(🐘 PostgreSQL)]
+    G --> H[✅ Pedido registrado]
 ```
 
 ---
 
 # 🎯 Learning Objectives
 
-- REST APIs
-- Authentication
-- React Context
-- File Upload
-- PostgreSQL
-- Responsive UI
-- Component Architecture
+* REST APIs
+* Authentication
+* React Context
+* File Upload
+* PostgreSQL
+* Responsive UI
+* Component Architecture
 
 ---
 
-## 📊 Dailyfoods — Tecnologias
+# 📊 Dailyfoods — Tecnologias
 
 ```mermaid
 pie title Dailyfoods - Tecnologias
