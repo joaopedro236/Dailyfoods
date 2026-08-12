@@ -65,6 +65,7 @@ Dailyfoods
 │
 ├── API
 │   ├── Database
+│   ├── Prompts
 │   ├── Routers
 │   ├── Validation
 │   └── main.py
@@ -143,6 +144,18 @@ F --> A
 - Component Architecture
 
 ---
+
+## 📊 Dailyfoods — Tecnologias
+
+```mermaid
+pie title Dailyfoods - Tecnologias
+    "React" : 35
+    "Python / FastAPI" : 35
+    "PostgreSQL" : 20
+    "JavaScript / CSS" : 10
+
+---
+
 
 # 👨‍💻 Author
 
