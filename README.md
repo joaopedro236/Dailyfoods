@@ -70,8 +70,16 @@ Dailyfoods
 │   ├── StylesGlobals
 │   └── Assets
 │
-├── Uploads
-└── README.md
+├── .env
+├── .env-example
+├── .gitignore
+├── .oxlintrc.json
+├── index.html
+├── package.json
+├── pnpm-lock.yaml
+|── README.md
+|── test.ipynb
+└── vite.config.js
 ```
 
 ---
@@ -93,15 +101,17 @@ python -m venv .venv
 
 pip install -r requirements.txt
 
-uvicorn main:app --reload
+cd ..
+
+uvicorn API.main:app --reload
 ```
 
 ## Frontend
 
 ```bash
-npm install
+pnpm install
 
-npm run dev
+pnpm dev
 ```
 
 ---
