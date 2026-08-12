@@ -14,7 +14,7 @@
 
 Dailyfoods is a full-stack food delivery application inspired by iFood.
 
-The project was developed to practice modern web development concepts using **React**, **FastAPI**, and **PostgreSQL**, focusing on authentication, restaurant management, order visualization and responsive UI.
+The project was developed to practice modern web development concepts using **React**, **FastAPI**, and **PostgreSQL**, focusing on authentication, restaurant management, order visualization, and responsive UI.
 
 ---
 
@@ -77,8 +77,8 @@ Dailyfoods
 ├── index.html
 ├── package.json
 ├── pnpm-lock.yaml
-|── README.md
-|── test.ipynb
+├── README.md
+├── test.ipynb
 └── vite.config.js
 ```
 
@@ -89,7 +89,7 @@ Dailyfoods
 ## Clone
 
 ```bash
-git clone https://github.com/SEU-USUARIO/Dailyfoods.git
+git clone https://github.com/YOUR-USERNAME/Dailyfoods.git
 ```
 
 ## Backend
@@ -120,9 +120,9 @@ pnpm dev
 
 ```mermaid
 flowchart LR
-    A[👤 Usuário] --> B[⚛️ React]
+    A[👤 User] --> B[⚛️ React]
     B --> C[🚀 FastAPI]
-    C --> D[🔐 Validação]
+    C --> D[🔐 Validation]
     D --> E[(🐘 PostgreSQL)]
     E --> F[📤 Response]
     F --> B
@@ -134,13 +134,13 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    A[👤 Cliente] --> B[🍔 Restaurante]
-    B --> C[📋 Cardápio]
-    C --> D[🛒 Adicionar ao pedido]
-    D --> E[💳 Finalizar pedido]
+    A[👤 Customer] --> B[🍔 Restaurant]
+    B --> C[📋 Menu]
+    C --> D[🛒 Add to Cart]
+    D --> E[💳 Place Order]
     E --> F[🚀 FastAPI]
     F --> G[(🐘 PostgreSQL)]
-    G --> H[✅ Pedido registrado]
+    G --> H[✅ Order Registered]
 ```
 
 ---
@@ -157,10 +157,10 @@ flowchart TD
 
 ---
 
-# 📊 Dailyfoods — Tecnologias
+# 📊 Dailyfoods — Technologies
 
 ```mermaid
-pie title Dailyfoods - Tecnologias
+pie title Dailyfoods - Technologies
     "React" : 35
     "Python / FastAPI" : 35
     "PostgreSQL" : 20
