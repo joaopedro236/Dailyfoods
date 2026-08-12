@@ -147,7 +147,7 @@ F --> A
 
 ## 📊 Dailyfoods — Tecnologias
 
-```mermaid
+
 pie title Dailyfoods - Tecnologias
     "React" : 35
     "Python / FastAPI" : 35
