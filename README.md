@@ -147,16 +147,16 @@ F --> A
 
 ## 📊 Dailyfoods — Tecnologias
 
-
+```mermaid
 pie title Dailyfoods - Tecnologias
     "React" : 35
     "Python / FastAPI" : 35
     "PostgreSQL" : 20
     "JavaScript / CSS" : 10
+```
 
 ---
 
-
 # 👨‍💻 Author
 
-João Pedro 
+João Pedro
