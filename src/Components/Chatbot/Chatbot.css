@@ -1,7 +1,15 @@
-.chatBotBtn {
+.chatBotBtn,
+.chatBotSubmit {
     background-color: var(--primary-red);
 }
-.chatBot {
+.chatBot,
+.chatBot header button {
     border: 1px solid var(--border);
     box-shadow: 0px 0px 10px var(--border);
+}
+@media (max-width:400px) {
+    .chatBot {
+        right: 0;
+        
+    }
 }

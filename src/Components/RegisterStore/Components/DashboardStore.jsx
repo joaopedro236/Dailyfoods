@@ -14,8 +14,14 @@ function Card_DashboardStore(props) {
         <>
             <div className="card_dashboardStore flex p-4 rounded-[10px] h-[140px] max-w-[170px] flex-col w-full  items-center justify-center gap-1">
                 <img src={props.icon} alt="icon card" className='w-full max-w-[47px] p-2.5 rounded-full' style={{ backgroundColor: props.color }} />
-                <h1 className='text-[19px]'>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, }).format(props.formDataAPI?.[props.formDataAPIName] ?? 0)}</h1>
-
+                <h1 className='text-[19px]'>
+                    {props.formDataAPIName === 'invoicing'
+                        ? Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                        }).format(props.formDataAPI?.[props.formDataAPIName] ?? 0)
+                        : props.formDataAPI?.[props.formDataAPIName] ?? 0}
+                </h1>
                 <p className='text-[12.5px]'>{props.title}</p>
             </div>
         </>
@@ -115,10 +121,19 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
                     password: formDataAPI.password || '',
                 }),
             })
-            if (!response_updateMetrics) {
+            if (!response_updateMetrics.ok) {
                 throw new Error(`Request error: ${response_updateMetrics.status}`);
             }
             const data_updateMetrics = await response_updateMetrics.json()
+            if (!data_updateMetrics.Status) {
+                throw new Error(data_updateMetrics.Error);
+            }
+
+            setFormDataAPI(prev => ({
+                ...prev,
+                orders: data_updateMetrics.orders,
+                invoicing_history: data_updateMetrics.invoicing_history
+            }));
 
         } catch (error) {
             console.error(error)
@@ -140,12 +155,15 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
             const responseOrders = await fetch(`${APIURL}/orders_items${savedToken ? `?restaurant_session_token=${encodeURIComponent(savedToken)}` : ''}`, {
                 credentials: 'include'
             })
-            if (!responseOrders) {
-                throw new Error(`Request error: ${responseOrders.status}`);
-            }
             const jsonOrders = await responseOrders.json()
-            const nextOrders = Array.isArray(jsonOrders?.orders) ? jsonOrders.orders : [];
-            setOrdersForm(nextOrders)
+            const orders = jsonOrders.orders || [];
+
+            setOrdersForm(orders);
+
+            setFormDataAPI(prev => ({
+                ...prev,
+                orders: orders.length
+            }));
 
         } catch (error) {
             console.error(error)

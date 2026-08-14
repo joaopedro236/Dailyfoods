@@ -107,13 +107,13 @@ def get_user(
     try:
         conn, cursor = connect_database_user()
         cursor.execute(
-            "SELECT name_user, email FROM users_Dailyfoods WHERE session_token = %s",
+            "SELECT name_user, email, money FROM users_Dailyfoods WHERE session_token = %s",
             (token,),
         )
         userData = cursor.fetchone()
 
         if userData:
-            return {"Status": True, "name": userData[0], "email": userData[1]}
+            return {"Status": True, "name": userData[0], "email": userData[1], "money": userData[2]}
         return {"Status": False}
     except Exception as e:
         return {"Status": False, "Error": str(e)}

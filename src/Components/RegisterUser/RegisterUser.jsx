@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import RegisterNSComponent from './Components/RegisterNS/RegisterNS'
 import PhotoBackground from '../../assets/Photos/Gemini_Generated_Image_b7rt8lb7rt8lb7rt.png'
 
-export default function Login({ state,nextStep, setNextStep, user, setUser}) {
+export default function Login({ state,nextStep, setNextStep, user, setUser,chatBotActive}) {
     const [submitActive, setSubmitActive] = useState(false)
     const [emailExists, setEmailExists] = useState(false)
     const [CNPJExists, setCNPJExists] = useState(false)
@@ -116,7 +116,7 @@ export default function Login({ state,nextStep, setNextStep, user, setUser}) {
                     <p className='text-sm text-gray-600'>By continuing, you agree to receive communications from Dailyfoods.</p>
                 </div>
             </section>
-            <RegisterNSComponent state={nextStep} CNPJExists={CNPJExists} user={user} setUser={setUser} nameInvalid stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
+            <RegisterNSComponent chatBotActive={chatBotActive} state={nextStep} CNPJExists={CNPJExists} user={user} setUser={setUser} nameInvalid stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
 
         </>
     )

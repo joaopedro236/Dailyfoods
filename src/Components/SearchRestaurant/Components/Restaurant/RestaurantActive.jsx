@@ -1,7 +1,9 @@
 import './RestaurantActive.css'
+import OrderActive from '../OrderActive/OrderActive';
 import { useState } from 'react'
 export default function Restaurant({ restaurant, restaurantActive, setRestaurantActive }) {
     if (!restaurant) return null
+    const [selectedOrder, setSelectedOrder] = useState([]);
     const orders = restaurant.orderName.map((name, index) => ({
         name,
         image: restaurant.orderImage[index],
@@ -11,7 +13,6 @@ export default function Restaurant({ restaurant, restaurantActive, setRestaurant
         comments: restaurant.restaurantComments
     }))
     const [loading, setLoading] = useState(false)
-    const [orderActive, setOrderActive] = useState(-1)
     const [comment, setComment] = useState('')
     const [comments, setComments] = useState(restaurant.restaurantComments || [])
     const sendComment = async () => {
@@ -20,26 +21,26 @@ export default function Restaurant({ restaurant, restaurantActive, setRestaurant
         formData.append("restaurantId", restaurant.id);
         formData.append("restaurantComments", comment);
         setLoading(true)
-        try{
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
-            method: "POST",
-            credentials: "include",
-            body: formData,
-        })
-        const data = await response.json()
-        if (data.Status) {
-            setComments(prev => [...prev, comment]);
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
+                method: "POST",
+                credentials: "include",
+                body: formData,
+            })
+            const data = await response.json()
+            if (data.Status) {
+                setComments(prev => [...prev, comment]);
+                setComment("");
+            }
+            else {
+                alert(data.Error);
+            }
             setComment("");
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setLoading(false)
         }
-        else {
-            alert(data.Error);
-        }
-        setComment("");
-    } catch (error){
-        console.error(error)
-    }finally{
-        setLoading(false)
-    }
     };
     return (
         <>
@@ -56,10 +57,15 @@ export default function Restaurant({ restaurant, restaurantActive, setRestaurant
                     <div className="orders_restaurantActive flex flex-col gap-3 w-full">
                         {
                             orders?.map((restaurantMap, index) => (
-                                <div className={`order_restaurantActive flex items-center cursor-pointer gap-4 p-2 w-full ${orderActive === index ? 'flex-col items-start !opacity-100' : ''}`} key={index} onClick={() => setOrderActive(orderActive === index ? -1 : index)}>
+                                <div className={`order_restaurantActive flex items-center cursor-pointer gap-4 p-2 w-full`} key={index} onClick={() => {
+                                    setSelectedOrder(prev =>
+                                        prev.some(item => item.name === restaurantMap.name)
+                                            ? prev.filter(item => item.name !== restaurantMap.name)
+                                            : [...prev, restaurantMap]
+                                    )
+                                }}>
                                     <img src={`http://localhost:8000/uploadsOrders/${restaurantMap?.image}`} alt="orders image" className='w-full max-w-[65px] rounded-lg' />
                                     <h1>{restaurantMap?.name}</h1>
-                                    <p className={`${orderActive === index ? 'flex' : 'hidden'}`}>{restaurantMap?.description}</p>
                                     <p className='ml-auto text-sm'>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, }).format(restaurantMap?.price ?? 0)}</p>
                                 </div>
                             ))
@@ -93,6 +99,7 @@ export default function Restaurant({ restaurant, restaurantActive, setRestaurant
                     </div>
                 </div>
             </section>
+            <OrderActive selectedOrder={selectedOrder} setSelectedOrder={setSelectedOrder} />
         </>
     )
 }

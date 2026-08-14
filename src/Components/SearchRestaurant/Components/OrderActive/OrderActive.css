@@ -1,0 +1,9 @@
+.orderActive button {
+    background-color: var(--primary-red);
+}
+
+@media (hover:hover) {
+    .orderActive button:hover {
+        opacity: 0.8;
+    }
+}

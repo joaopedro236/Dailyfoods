@@ -20,7 +20,7 @@ def chatbot(data: ChatbotValidation):
                     "role": "system",
                     "content": prompt,
                 },
-                {"role": "user", "content": data.name},
+                {"role": "user", "content": data.text},
             ],
             options={"temperature": 0},
         )

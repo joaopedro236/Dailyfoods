@@ -4,7 +4,7 @@ import iconSearch from '../../assets/Icons/icons8-pesquisar-30.png'
 import itemsNavbar from './NavbarJSON'
 import iconMenu from '../../assets/Icons/icons8-cardápio-48.png'
 
-export default function Navbar({ setState, state, user }) {
+export default function Navbar({ setState, state, user, onHome }) {
     const [inputItemsActive, setInputItemsActive] = useState(false)
     const [menuActive, setMenuActive] = useState(false)
     const [navbarActive, setNavbarActive] = useState(false)
@@ -47,6 +47,7 @@ export default function Navbar({ setState, state, user }) {
                             <li key={ItemsMenuMap.id} className={`duration-300 text-gray-300 text-lg font-bold cursor-pointer ${ItemsMenuMap.id == textMenuActive ? 'text-white Active' : 'text-gray-300'}`} onClick={() => {
                                 setTextMenuActive(ItemsMenuMap.id)
                                 setState(ItemsMenuMap.id)
+                                onHome()
                                 setMenuActive(false)
                             }}>{ItemsMenuMap.name}</li>
 

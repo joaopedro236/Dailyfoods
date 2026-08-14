@@ -1,4 +1,3 @@
-
 from ..Database.Config.connectDatabaseRestaurantConfig import connect_database
 from fastapi import (
     APIRouter,
@@ -54,8 +53,10 @@ async def register_store(
     image_url = f"http://localhost:8000/uploads/{imageName}"
     try:
         try:
-            PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "restaurantName.txt"
-                        
+            PROMPT_PATH = (
+                Path(__file__).parent.parent / "prompts" / "restaurantName.txt"
+            )
+
             with open(PROMPT_PATH, "r", encoding="utf-8") as file:
                 prompt = file.read()
             moderation = ollama.chat(
@@ -71,7 +72,7 @@ async def register_store(
             )
 
             result = moderation["message"]["content"].strip().upper()
-            
+
             if "BLOCK" in result:
                 return {"Status": False, "Error": "Invalid restaurant name."}
         except Exception as e:
@@ -137,7 +138,7 @@ async def register_store(
                     data.restauranttag,
                 ),
             )
-            cojnn.commit()
+            conn.commit()
         except Exception as db_error:
             if conn:
                 conn.rollback()
@@ -311,13 +312,15 @@ def update_metrics(data: Store):
     try:
         conn, cursor = connect_database()
         cursor.execute(
-            "SELECT invoicing_history FROM restaurantConfig WHERE CNPJ = %s",
+            """SELECT invoicing_history, cardinality(orderstate)
+    FROM restaurantConfig
+    WHERE CNPJ = %s""",
             (data.CNPJ,),
         )
         result = cursor.fetchone()
         if result is None:
             return {"Status": False, "Error": "CNPJ not found"}
-        history = [float(x) for x in result[0]]
+        history = [0.0] * 7
         day = datetime.today().weekday()
         history[day] = float(data.invoicing)
         cursor.execute(
@@ -339,9 +342,8 @@ WHERE CNPJ = %s
                 data.CNPJ,
             ),
         )
-
         conn.commit()
-        return {"Status": True}
+        return {"Status": True, "orders": result[1], "invoicing_history": result[0]}
     except Exception as e:
         if conn:
             conn.rollback()
@@ -360,7 +362,7 @@ from typing import Optional
 @router.post("/orders")
 async def orders(
     request: Request,
-    restaurantId: int = Form(...),
+    restaurantId: int = Form(None),
     orderName: Optional[str] = Form(None),
     orderDescription: Optional[str] = Form(None),
     orderPrice: Optional[float] = Form(None),
@@ -372,32 +374,31 @@ async def orders(
     token = request.cookies.get("restaurant_session_token")
     try:
         try:
-            PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "comments.txt"           
+            PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "comments.txt"
             with open(PROMPT_PATH, "r", encoding="utf-8") as file:
                 prompt = file.read()
                 moderation = ollama.chat(
                     model="llama3.2:3b",
                     messages=[
                         {
-                                "role": "system",
-                                "content": prompt,
-                            },
-                            {"role": "user", "content": restaurantComments},
-                        ],
-                        options={"temperature": 0},
-                    )
-        
+                            "role": "system",
+                            "content": prompt,
+                        },
+                        {"role": "user", "content": restaurantComments},
+                    ],
+                    options={"temperature": 0},
+                )
+
             result = moderation["message"]["content"].strip().upper()
-                    
+
             if result == "BLOCK":
                 return {"Status": False, "Error": "Invalid comment."}
         except Exception as e:
-                return {
-                        "Status": False,
-                        "Error": "Unable to validate restaurant name.",
-                        "ErrorGross": str(e),
-                    }
-       
+            return {
+                "Status": False,
+                "Error": "Unable to validate restaurant name.",
+                "ErrorGross": str(e),
+            }
 
         UploadsOrders = Path(__file__).resolve().parents[2] / "UploadsOrders"
         UploadsOrders.mkdir(exist_ok=True)
@@ -487,12 +488,12 @@ def orders_items(request: Request, restaurant_session_token: str | None = None):
         for i in range(len(result[1])):
             orders.append(
                 {
-                    "image": f"http://localhost:8000/uploadsOrders/{result[0][i]}",
+                    "image": f"http://localhost:8000/uploadsOrders/{result[0][i] if i < len(result[0]) else ''}",
                     "name": result[1][i],
                     "price": result[2][i],
                     "description": result[3][i],
                     "state": result[4][i],
-                    "comments": result[5][i],
+                    "comments": result[5] or [],
                 }
             )
 
@@ -552,7 +553,7 @@ def add_money(request: Request):
         cursor.execute(
             """
             UPDATE restaurantConfig
-    SET invoicing = invoicing + 100
+    SET invoicing = invoicing +100
     WHERE session_token = %s
     RETURNING invoicing
             """,
@@ -568,3 +569,71 @@ def add_money(request: Request):
     finally:
         cursor.close()
         conn.close()
+
+
+@router.post("/pay")
+def pay(
+    request: Request,
+    orderPrice: float = Form(None),
+):
+    conn = None
+    cursor = None
+    connUser = None
+    cursorUser = None
+    token = request.cookies.get("restaurant_session_token")
+    tokenUser = request.cookies.get("user_session_token")
+    if not token or not tokenUser:
+        return {"Status": False, "Error": "No restaurant session found"}
+    if orderPrice is None:
+        return {"Status": False, "Error": "Order price not provided"}
+    try:
+        conn, cursor = connect_database()
+        connUser, cursorUser = connect_database_user()
+        cursorUser.execute(
+            """SELECT money, purchasedorders FROM users_Dailyfoods WHERE session_token = %s""",
+            (tokenUser,),
+        )
+        resultUser = cursorUser.fetchall()
+        cursor.execute(
+            """SELECT invoicing FROM restaurantConfig WHERE session_token = %s""",
+            (token,),
+        )
+        resultRestaurant = cursor.fetchall()
+        if resultUser[0][0] >= orderPrice:
+            cursorUser.execute(
+                """
+                UPDATE users_Dailyfoods
+                    SET
+                        money = money - %s,
+                        purchasedorders = purchasedorders +1
+                    WHERE session_token = %s
+            """,
+                (orderPrice, tokenUser),
+            )
+            cursor.execute(
+                """
+                UPDATE restaurantConfig
+                SET 
+                    invoicing = invoicing + %s
+                WHERE session_token = %s""",
+                (orderPrice, token),
+            )
+            conn.commit()
+            connUser.commit()
+            return {"Status": True, "Message": "Payment successful"}
+        else:
+            return {
+                "Status": False,
+                "Error": "Unfortunately, the user does not have a sufficient balance.",
+            }
+    except Exception as e:
+        return {"Status": False, "Error": str(e)}
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+        if cursorUser:
+            cursorUser.close()
+        if connUser:
+            connUser.close()

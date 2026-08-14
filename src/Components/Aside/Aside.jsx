@@ -3,7 +3,7 @@ import ItemsAside from './AsideJSON'
 import { useState, useEffect } from 'react'
 import iconConfig from '../../assets/Icons/icons8-config-50.png'
 import iconCloseAside from '../../assets/Icons/icons8-fechar-abas-no-painel-esquerdo-48.png'
-export default function Aside({ setState, state, user }) {
+export default function Aside({ setState, state, user, onHome }) {
     const [itemsAsideActive, setItemsAsideActive] = useState(1)
     const [asideActive, setAsideActive] = useState(true)
     useEffect(() => {
@@ -29,6 +29,7 @@ export default function Aside({ setState, state, user }) {
                             <li className={`text-gray-300  text-[14.5px] flex gap-3 w- p-2.5 cursor-pointer ${itemsAsideActive == ItemsAsideMap.id ? 'Active rounded-sm' : ''} ${asideActive ? ' items-center justify-center' : 'rounded-sm'}`} onClick={() => {
                                 setItemsAsideActive(ItemsAsideMap.id)
                                 setState(ItemsAsideMap.id)
+                                onHome()
                             }} key={ItemsAsideMap.id}>
                                 <img src={ItemsAsideMap.image} alt="icons Aside" className='brightness-0 invert-100 w-5' />
                                 <p className={`${asideActive ? 'hidden' : 'flex'}`}>{ItemsAsideMap.name}</p>

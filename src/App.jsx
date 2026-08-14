@@ -14,6 +14,7 @@ function App() {
   const [nextStep, setNextStep] = useState(false)
   const [nextStepLoginUser, setNextStepLoginUser] = useState(false)
   const [user, setUser] = useState(false)
+  const[chatbotActive, setChatBotActive] = useState(false)
   const [asideOrNavbarItems, setAsideOrNavbarItems] = useState(5)
   const [formDataAPI, setFormDataAPI] = useState({})
   useEffect(() => {
@@ -32,6 +33,9 @@ function App() {
 
     checkSession()
   }, [])
+  const handleHome = () => {
+    navigate("/")
+  }
   useEffect(() => {
     const keyboard = (e) => {
       if (e.ctrlKey) {
@@ -41,9 +45,8 @@ function App() {
         if (number >= 1 && number <= 5 && user == true) {
           e.preventDefault()
           setAsideOrNavbarItems(number)
-          if (number === 1) {
-            navigate('/')
-          }
+
+          navigate('/')
         }
 
       }
@@ -56,40 +59,40 @@ function App() {
     }
   }, [user])
   useEffect(() => {
-    setAsideOrNavbarItems(user ? 1:5)
+    setAsideOrNavbarItems(user ? 1 : 5)
   }, [user])
   return (
     <>
-      <Navbar state={asideOrNavbarItems} setState={setAsideOrNavbarItems} user={user} />
-      <Aside state={asideOrNavbarItems} setState={setAsideOrNavbarItems} user={user} />
+      <Navbar state={asideOrNavbarItems} setState={setAsideOrNavbarItems} user={user} onHome={handleHome} />
+      <Aside state={asideOrNavbarItems} setState={setAsideOrNavbarItems} user={user} onHome={handleHome} />
       <Routes>
-            <Route
-                path="/"
-                element={
-                    <SearchRestaurant
-                        state={asideOrNavbarItems}
-                        setState={setAsideOrNavbarItems}
-                    />
-                }
+        <Route
+          path="/"
+          element={
+            <SearchRestaurant
+              state={asideOrNavbarItems}
+              setState={setAsideOrNavbarItems}
             />
+          }
+        />
 
-            <Route
-                path="/restaurant/:restaurantId"
-                element={
-                    <SearchRestaurant
-                        state={asideOrNavbarItems}
-                        setState={setAsideOrNavbarItems}
-                    />
-                }
-            />  
-        </Routes>
+        <Route
+          path="/restaurant/:restaurantId"
+          element={
+            <SearchRestaurant
+              state={asideOrNavbarItems}
+              setState={setAsideOrNavbarItems}
+            />
+          }
+        />
+      </Routes>
 
       <RegisterStore state={asideOrNavbarItems} nextStepTwo={nextStep} formDataAPI={formDataAPI}
         setFormDataAPI={setFormDataAPI} />
-      <RegisterUser nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setState={setAsideOrNavbarItems} />
+      <RegisterUser chatBotActive={setChatBotActive} nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setState={setAsideOrNavbarItems} />
       <LoginStore state={asideOrNavbarItems} setNextStep={setNextStep} setState={setAsideOrNavbarItems} setFormDataAPI={setFormDataAPI} />
       <LoginUser nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setNextStep={setNextStep} setState={setAsideOrNavbarItems} />
-      <Chatbot/>
+      <Chatbot setChatBotActive={setChatBotActive} chatbotActive={chatbotActive}/>
     </>
   )
 }

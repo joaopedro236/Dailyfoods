@@ -5,7 +5,7 @@ def create_database():
     conn = None
     cursor = None
     try:
-        conn, cursor = connect_database()
+        conn, cursor = connect_database_user()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users_Dailyfoods(
                 id SERIAL PRIMARY KEY,
@@ -15,7 +15,9 @@ def create_database():
                 password VARCHAR(200) NOT NULL,
                 CNPJ CHAR(14)  UNIQUE NOT NULL,
                 CEP CHAR(9) NOT NULL,
-                session_token UUID NOT NULL
+                session_token UUID NOT NULL,
+                money DECIMAL(10, 2) DEFAULT 0.0 NOT NULL,
+                purchasedOrders INT DEFAULT 0 NOT NULL
             )
         """)
         conn.commit()

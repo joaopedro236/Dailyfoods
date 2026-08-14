@@ -2,7 +2,19 @@ import './RegisterNS.css'
 import User from '../User/User'
 import inputs from './InputsJSON'
 import { useState, useEffect } from 'react'
-export default function RegisterNS({ user,nameInvalid, setUser, state, setState, handleForm, formData, handleFormEdit, stateSection, CNPJExists }) {
+export default function RegisterNS({
+    user,
+    nameInvalid,
+    setUser,
+    state,
+    setState,
+    handleForm,
+    formData,
+    handleFormEdit,
+    stateSection,
+    CNPJExists,
+    chatBotActive
+}) {
     const [submitActive, setSubmitActive] = useState(false)
     const [userData, setUserData] = useState({})
     const APIURL = import.meta.env.VITE_API_URL
@@ -74,7 +86,12 @@ export default function RegisterNS({ user,nameInvalid, setUser, state, setState,
                     </form>
                 </div>
             </section>
-            <User user={user} formData={userData} stateSection={stateSection} />
+            <User
+                user={user}
+                formData={userData}
+                stateSection={stateSection}
+                chatBotActive={chatBotActive}
+            />
         </>
     )
 }

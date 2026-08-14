@@ -3,7 +3,7 @@ import './User.css'
 import cardsUser from './UserCards.js'
 import { useState, useEffect } from 'react'
 import cameraPhoto from '../../../../assets/Icons/icons8-câmera-30.png'
-export default function User({ user, formData, stateSection }) {
+export default function User({ user, formData, stateSection, chatBotActive }) {
     const firstname = formData?.name?.trim().split(' ')[0] || ''
     const [data, setData] = useState(new Date())
     useEffect(() => {
@@ -45,7 +45,9 @@ export default function User({ user, formData, stateSection }) {
                             {
                                 cardsUser.map((cardsUserMap) => (
 
-                                    <div className='card_user flex gap-5 p-4 rounded-lg w-full items-center' key={cardsUserMap.id}>
+                                    <div className='card_user flex gap-5 p-4 rounded-lg w-full items-center' key={cardsUserMap.id} onClick={() => {
+                                        if (Number(cardsUserMap.id) == 4) chatBotActive(prev => !prev) 
+                                    }}>
                                         <img src={cardsUserMap.image} alt="icon card" className='icon_user w-5 ' />
                                         <p className='text-sm'>{cardsUserMap.text}</p>
                                         <p className='ml-auto font-bold'>&gt;</p>
