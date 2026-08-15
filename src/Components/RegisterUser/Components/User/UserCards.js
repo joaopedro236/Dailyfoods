@@ -1,27 +1,17 @@
-import photoPersonalData from '../../../../assets/Icons/icons8-usuário-24.png' 
-import photoNotification from '../../../../assets/Icons/icons8-lembrete-de-compromissos-50.png'
-import photoSupport from '../../../../assets/Icons/icons8-escudo-de-proibido-50.png'
-import photoSecurity from '../../../../assets/Icons/icons8-segurança-64.png'
+import iconMoney from '../../../../assets/Icons/icons8-dólar-64.png'
+import iconCount from '../../../../assets/Icons/icons8-nota-50.png'
 const cards = [
     {
         id:1,
-        text:'Personal data',
-        image:photoPersonalData
+        title:'Money',
+        name:'money',
+        icon:iconMoney
     },
     {
         id:2,
-        text:"Notification",
-        image:photoNotification
-    },
-    {
-        id:3,
-        text:'Security',
-        image:photoSecurity
-    },
-    {
-        id:4,
-        text:'Help and support',
-        image:photoSupport
+        title:'Purchased orders',
+        name:'purchasedOrders',
+        icon: iconCount
     }
 ]
 export default cards

@@ -1,9 +1,26 @@
 import hiddenPhoto from '../../../../assets/Photos/219eaea67aafa864db091919ce3f5d82.jpg'
 import './User.css'
-import cardsUser from './UserCards.js'
+import topicsUser from './UserTopics.js'
 import { useState, useEffect } from 'react'
+import cards from './UserCards.js'
 import cameraPhoto from '../../../../assets/Icons/icons8-câmera-30.png'
-export default function User({ user, formData, stateSection, chatBotActive }) {
+function Card(props) {
+    return (
+        <>
+            <div className="cardInfo_user w-full flex rounded-lg flex-col max-w-[170px] h-[110px] items-center justify-center p-3 " >
+                <img src={props?.icon} alt="icons" className='p-2 w-[45px] bg-red-700 rounded-full' />
+                < h1 className='mt-2' > {props?.name == 'money'
+                    ? Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(props?.formData?.[props?.name] ?? 0)
+                    : props?.formData?.[props?.name] ?? 0}</h1>
+                <p className='text-gray-600 text-xs'>{props?.title}</p>
+            </div >
+        </>
+    )
+}
+export default function User({ user, formData, userInformations, stateSection, chatBotActive }) {
     const firstname = formData?.name?.trim().split(' ')[0] || ''
     const [data, setData] = useState(new Date())
     useEffect(() => {
@@ -43,14 +60,15 @@ export default function User({ user, formData, stateSection, chatBotActive }) {
                         <h3 className='pl-3'>Account management</h3>
                         <div className="cards_user flex cursor-pointer flex-col gap-2 rounded-lg">
                             {
-                                cardsUser.map((cardsUserMap) => (
+                                topicsUser.map((cardsUserMap) => (
 
                                     <div className='card_user flex gap-5 p-4 rounded-lg w-full items-center' key={cardsUserMap.id} onClick={() => {
-                                        if (Number(cardsUserMap.id) == 4) chatBotActive(prev => !prev) 
+                                        if (Number(cardsUserMap.id) == 4) chatBotActive(prev => !prev)
                                     }}>
                                         <img src={cardsUserMap.image} alt="icon card" className='icon_user w-5 ' />
                                         <p className='text-sm'>{cardsUserMap.text}</p>
-                                        <p className='ml-auto font-bold'>&gt;</p>
+
+                                        <div className="card_user"></div>  <p className='ml-auto font-bold'>&gt;</p>
                                     </div>
 
                                 ))
@@ -58,6 +76,16 @@ export default function User({ user, formData, stateSection, chatBotActive }) {
                         </div>
                     </div>
                 </div>
+                <h1 className='ml-5'>Informations</h1>
+                <div className="cards grid w-full grid-cols-2 place-items-center p-5">
+                    {cards.map((cardsMap) => (
+                        <div className="w-full flex justify-center items-center" key={cardsMap.id}>
+                            < Card formData={userInformations}title={cardsMap.title} name={cardsMap?.name} icon={cardsMap.icon} />
+                        </div>
+                    ))
+                    }
+                </div>
+                <p className='ml-5 text-xs text-gray-500 w-full max-w-[300px]'>Here is the information; if you want to make money, start a restaurant.</p>
                 <article className='flex w-full flex-col p-5 gap-5'>
                     <div className="cardsArticle_user items-center flex flex-wrap gap-5 justify-center w-full">
                         <div className="promotion w-full max-w-[450px] h-[200px] items-center justify-center flex px-4 flex-col rounded-[20px]">
@@ -68,12 +96,13 @@ export default function User({ user, formData, stateSection, chatBotActive }) {
                             </div>
                         </div>
                         <div className="time promotion w-full rounded-[20px] max-w-[400px] h-[200px] flex  flex-col items-center justify-center ">
-                            
+
                             <h1 className='text-[50px] font-bold'>{data.toLocaleTimeString()}</h1>
                         </div>
                     </div>
-                    
+
                 </article>
+
             </section>
         </>
     )

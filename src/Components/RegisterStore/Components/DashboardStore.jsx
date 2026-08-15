@@ -67,37 +67,35 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
         if (!file) return
 
         const formData = new FormData()
+        formData.append("image", file)
 
-        formData.append("image", file);
-        formData.append("name", formDataAPI.name);
-        formData.append("CNPJ", formDataAPI.CNPJ);
-        formData.append("CEP", formDataAPI.CEP);
-        formData.append("orders", formDataAPI.orders)
-        formData.append("completed", formDataAPI.completed)
-        formData.append("progress", formDataAPI.progress)
         try {
-            const response = await fetch(`${APIURL}/api/registerStore`, {
-                method: "POST",
-                credentials: 'include',
+            const response = await fetch(`${APIURL}/api/store/image`, {
+                method: "PUT",
+                credentials: "include",
                 body: formData,
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(`Request error: ${response.status}`);
+            })
+
+            const data = await response.json()
+
+            if (!response.ok || !data.Status) {
+                throw new Error(data.Error || `Request error: ${response.status}`)
             }
-            onImageSelect(file);
+
+            onImageSelect(file)
+
             if (data.image) {
                 setFormDataAPI(prev => ({
                     ...prev,
                     image: data.image
-                }));
+                }))
             }
+
         } catch (error) {
-            console.error(error);
+            console.error(error)
         }
 
         event.target.value = ''
-
     }
 
     const updateMetrics = async () => {
@@ -205,6 +203,34 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
         } catch (error) {
             console.error(error)
         }
+    }
+    const [imageInfo, setImageInfo] = useState(null)
+
+    const handleImage = (e) => {
+        const file = e.target.files[0]
+
+        if (!file) return
+
+        const img = new Image()
+
+        img.onload = () => {
+            const sizeMB = file.size / 1024 / 1024
+
+            if (
+                file.type === 'image/jpeg' &&
+                sizeMB <= 5 &&
+                img.width <= 2000 &&
+                img.height <= 2000
+            ) {
+            } else {
+                alert('Image invalid!')
+            }
+
+            URL.revokeObjectURL(img.src)
+        }
+
+        img.src = URL.createObjectURL(file)
+
     }
     return (
         <>

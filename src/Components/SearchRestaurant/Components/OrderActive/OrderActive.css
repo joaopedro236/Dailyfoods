@@ -7,3 +7,14 @@
         opacity: 0.8;
     }
 }
+@media (min-width: 1024px) {
+    .orderActive {
+        align-items: center;
+        justify-content: center;
+    }
+
+    .orderActive > * {
+        width: 100%;
+        max-width: 450px;
+    }
+}

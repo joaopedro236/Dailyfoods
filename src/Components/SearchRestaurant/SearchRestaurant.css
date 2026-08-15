@@ -17,7 +17,9 @@
         background-color: rgba(88, 88, 88, 0.052);
         opacity: 0.9;
     }
-
+    .addLimit_searchRestaurant:hover {
+        opacity: 0.6;
+    }
     .filters_search button:hover {
         color: var(--primary-red);
     }

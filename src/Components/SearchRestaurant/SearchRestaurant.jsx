@@ -1,3 +1,4 @@
+
 import './SearchRestaurant.css'
 import Restaurant from './Components/Restaurant/RestaurantActive'
 import { useState, useEffect } from 'react'
@@ -7,10 +8,10 @@ import { useCallback } from 'react'
 export default function SearchRestaurant({ state, setState }) {
     const { restaurantId } = useParams()
     const navigate = useNavigate()
-    
+
     const [SearchActive, setSearchActive] = useState(false)
     const [searchValue, setSearchValue] = useState('')
-    
+    const [limit, setLimit] = useState(100)
     const [selectedRestaurant, setSelectedRestaurant] = useState(null);
     const [filterOrdersExists, setFilterOrdersExists] = useState(false);
     const [filterActive, setFilterActive] = useState(false)
@@ -29,32 +30,29 @@ export default function SearchRestaurant({ state, setState }) {
                     : []
             setApiResult(nextResult)
             if (restaurantId) {
-    const restaurant = nextResult.find(
-        item => Number(item.id) === Number(restaurantId)
-    )
+                const restaurant = nextResult.find(
+                    item => Number(item.id) === Number(restaurantId)
+                )
 
-    if (restaurant) {
-        setSelectedRestaurant(restaurant)
-        setRestaurantActive(0)
-    }
-}
+                if (restaurant) {
+                    setSelectedRestaurant(restaurant)
+                    setRestaurantActive(0)
+                }
+            }
         } catch (error) {
             console.error(error)
             setApiResult([])
         }
-    },[apiUrl, restaurantId])
-    const filteredRestaurants = Array.isArray(apiResult)
-        ? apiResult.filter((restaurant) =>
-            restaurant?.name?.toLowerCase().includes(searchValue.toLowerCase())
-        )
-        
+    }, [apiUrl, restaurantId])
+    const restaurants = Array.isArray(apiResult)
+        ? apiResult
+            .filter((restaurant) =>
+                restaurant?.name?.toLowerCase().includes(searchValue.toLowerCase())
+            )
         : []
-        .filter((restaurant) =>
-            restaurant?.name.toLowerCase().includes(searchValue.toLowerCase())
-        )   
-        
 
-
+    const filteredRestaurants = restaurants.slice(0, limit)
+    const hasMore = restaurants.length > limit
     useEffect(() => {
         apiCall()
         const interval = setInterval(() => {
@@ -62,15 +60,15 @@ export default function SearchRestaurant({ state, setState }) {
         }, 30000);
         return () => clearInterval(interval)
     }, [apiCall])
-  useEffect(() => {
-    if (!restaurantId) {
-        setRestaurantActive(-1)
-        setSelectedRestaurant(null)
-    }
-}, [restaurantId])
+    useEffect(() => {
+        if (!restaurantId) {
+            setRestaurantActive(-1)
+            setSelectedRestaurant(null)
+        }
+    }, [restaurantId])
     return (
         <>
-            <section className={`${state ==1 ? 'flex' : 'hidden'} w-full searchSection gap-5 flex-col pt-[60px] relative`}>
+            <section className={`${state == 1 ? 'flex' : 'hidden'} w-full searchSection gap-5 flex-col pt-[60px] relative`}>
                 <header className='w-full flex px-3 relative justify-center'>
                     <div className='relative w-full max-w-[500px]'>
                         <label htmlFor="search" className='absolute top-[50%] -translate-y-1/2 left-3'>
@@ -82,15 +80,15 @@ export default function SearchRestaurant({ state, setState }) {
                             }`} onChange={(e) => setSearchValue(e.target.value)} />
                     </div>
                 </header>
-               
+
                 <div className={`restaurants flex flex-col gap-4  relative`}>
                     {filteredRestaurants.map((itemsRestaurantMap, index) => (
                         <div className={`restaurant  px-5  py-2 cursor-pointer items-center gap-4 ${searchValue.trim() === '' || searchItems ? 'flex' : 'hidden'}`} key={itemsRestaurantMap.id} onClick={() => {
-    setRestaurantActive(index)
-    setSelectedRestaurant(itemsRestaurantMap)
+                            setRestaurantActive(index)
+                            setSelectedRestaurant(itemsRestaurantMap)
 
-    navigate(`/restaurant/${itemsRestaurantMap.id}`)
-}}>
+                            navigate(`/restaurant/${itemsRestaurantMap.id}`)
+                        }}>
                             <img src={itemsRestaurantMap.image} alt="photo restaurant" className='w-[85px] rounded-lg' />
                             <h1>{itemsRestaurantMap.name}</h1>
                             <p className='ml-auto'>+</p>
@@ -98,6 +96,7 @@ export default function SearchRestaurant({ state, setState }) {
                     ))}
                     <p className={filteredRestaurants.length === 0 ? 'flex fixed top-[50%] left-[50%] -translate-1/2' : 'hidden'}>No results.</p>
                 </div>
+                <button className={`mt-3 addLimit_searchRestaurant m-auto ${hasMore ? 'flex' : 'hidden'}`} onClick={()=> setLimit(prev => prev + 100)}>Add restaurant</button>
                 <Restaurant restaurant={selectedRestaurant} setRestaurantActive={setRestaurantActive} restaurantActive={restaurantActive} />
             </section>
         </>

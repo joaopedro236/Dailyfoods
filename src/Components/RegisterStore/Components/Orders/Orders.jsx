@@ -36,7 +36,7 @@ export default function Orders({ stateSection, setOrdersSectionActive, OrdersSec
                 return
             }
 
-            console.error('Create order failed', response.status, dataResponse)
+            console.error('Create order failed', response.ok, dataResponse)
             alert(`Could not create the order. ${dataResponse?.Error || dataResponse?.detail || 'Please try again.'}`)
         }
         catch(error){

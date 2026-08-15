@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react'
 import RegisterNSComponent from './Components/RegisterNS/RegisterNS'
 import PhotoBackground from '../../assets/Photos/Gemini_Generated_Image_b7rt8lb7rt8lb7rt.png'
 
-export default function Login({ state,nextStep, setNextStep, user, setUser,chatBotActive}) {
+export default function Login({ state, nextStep, setNextStep, user, setUser, chatBotActive }) {
     const [submitActive, setSubmitActive] = useState(false)
     const [emailExists, setEmailExists] = useState(false)
     const [CNPJExists, setCNPJExists] = useState(false)
-    const[nameInvalid, setNameInvalid] = useState(false)
+    const [nameInvalid, setNameInvalid] = useState(false)
     const [formData, setFormData] = useState({
         email: '',
         name: '',
@@ -23,8 +23,8 @@ export default function Login({ state,nextStep, setNextStep, user, setUser,chatB
             [name]: value
         }))
     }
-    const apiURL = import.meta.env.VITE_API_URL 
-
+    const apiURL = import.meta.env.VITE_API_URL
+    const [userInformations, setUserInformation] = useState({ money: 0.0, purchasedOrders:0 })
     useEffect(() => {
         const restoreSession = async () => {
             try {
@@ -36,6 +36,11 @@ export default function Login({ state,nextStep, setNextStep, user, setUser,chatB
                 if (json.Status === true) {
                     setUser(true)
                     setNextStep(true)
+                    setUserInformation({
+                        money: json?.money || 0.0,
+                        purchasedOrders: json?.purchasedOrders || 0
+                        
+                })
                 }
             } catch (error) {
                 console.error(error)
@@ -77,7 +82,7 @@ export default function Login({ state,nextStep, setNextStep, user, setUser,chatB
                 return false
             }
             setCNPJExists(false)
-            if (json?.Error === 'Unable to validate  name.'){
+            if (json?.Error === 'Unable to validate  name.') {
                 setNameInvalid(true)
                 return false
             }
@@ -116,7 +121,7 @@ export default function Login({ state,nextStep, setNextStep, user, setUser,chatB
                     <p className='text-sm text-gray-600'>By continuing, you agree to receive communications from Dailyfoods.</p>
                 </div>
             </section>
-            <RegisterNSComponent chatBotActive={chatBotActive} state={nextStep} CNPJExists={CNPJExists} user={user} setUser={setUser} nameInvalid stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
+            <RegisterNSComponent chatBotActive={chatBotActive} userInformations={userInformations} state={nextStep} CNPJExists={CNPJExists} user={user} setUser={setUser} stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
 
         </>
     )

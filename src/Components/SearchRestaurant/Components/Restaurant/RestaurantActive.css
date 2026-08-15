@@ -28,10 +28,12 @@
 
     .orders_restaurantActive {
         grid-column: 1;
+        height: 587px;  
     }
 
     .comments {
         grid-column: 2;
     }
+    
 
 }

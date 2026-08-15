@@ -11,7 +11,8 @@ from fastapi import (
     Header,
 )
 import uuid
-
+from PIL import Image
+from io import BytesIO
 from ..Database.Config.connectDatabaseUser import connect_database_user
 import numpy as np
 from pathlib import Path
@@ -28,6 +29,7 @@ router = APIRouter()
 
 @router.post("/api/registerStore")
 async def register_store(
+    request:Request,
     response: Response,
     data: Store = Depends(Store.as_form),
     image: UploadFile = File(None),
@@ -39,7 +41,7 @@ async def register_store(
     dayWeek = datetime.today().weekday()
     Uploads = Path(__file__).resolve().parents[2] / "Uploads"
     Uploads.mkdir(exist_ok=True)
-
+    user_token = request.cookies.get("user_session_token")
     async def save_image(file: UploadFile, folder: Path):
         filename = file.filename or "upload"
         extension = Path(filename).suffix or ".jpg"
@@ -82,6 +84,31 @@ async def register_store(
                 "ErrorGross": str(e),
             }
         if image:
+            image_data = await image.read()
+
+            if len(image_data) > 5 * 1024 * 1024:
+                return {"Status": False, "Error": "Image is too large."}
+
+            try:
+                img = Image.open(BytesIO(image_data))
+
+                if img.format != "JPEG":
+                    return {"Status": False, "Error": "Only JPEG images are allowed."}
+
+                if img.width > 2000 or img.height > 2000:
+                    return {"Status": False, "Error": "Image dimensions are too large."}
+
+                img.verify()
+
+            except Exception:
+                return {"Status": False, "Error": "Invalid image."}
+
+            await image.seek(0)
+            image.file.write(image_data)
+            image.file.seek(0)
+
+            imageName = await save_image(image, Uploads)
+        if image:
             imageName = await save_image(image, Uploads)
 
         image_url = f"http://localhost:8000/uploads/{imageName}"
@@ -119,8 +146,8 @@ async def register_store(
 
                 return {"Status": True, "token": store[0], "image": image_url}
             hash_password = ph.hash(data.password)
-            command_sql = """ INSERT INTO restaurantConfig(name,image, CNPJ, CEP, session_token, invoicing, invoicing_history, orders, completed, progress, password, restauranttag)
-                            VALUES (%s, %s,%s, %s, %s, %s, %s, %s ,%s, %s, %s, %s)"""
+            command_sql = """ INSERT INTO restaurantConfig(name,image, CNPJ, CEP, session_token, invoicing, invoicing_history, orders, completed, progress, password, restauranttag, owner_token)
+                            VALUES (%s, %s,%s, %s, %s, %s, %s, %s ,%s, %s, %s, %s,%s)"""
             cursor.execute(
                 command_sql,
                 (
@@ -136,6 +163,7 @@ async def register_store(
                     data.progress,
                     hash_password,
                     data.restauranttag,
+                    user_token
                 ),
             )
             conn.commit()
@@ -377,22 +405,23 @@ async def orders(
             PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "comments.txt"
             with open(PROMPT_PATH, "r", encoding="utf-8") as file:
                 prompt = file.read()
-                moderation = ollama.chat(
-                    model="llama3.2:3b",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": prompt,
-                        },
-                        {"role": "user", "content": restaurantComments},
-                    ],
-                    options={"temperature": 0},
-                )
+                if restaurantComments:
+                    moderation = ollama.chat(
+                        model="llama3.2:3b",
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": prompt,
+                            },
+                            {"role": "user", "content": restaurantComments},
+                        ],
+                        options={"temperature": 0},
+                    )
 
-            result = moderation["message"]["content"].strip().upper()
+                    result = moderation["message"]["content"].strip().upper()
 
-            if result == "BLOCK":
-                return {"Status": False, "Error": "Invalid comment."}
+                    if result == "BLOCK":
+                        return {"Status": False, "Error": "Invalid comment."}
         except Exception as e:
             return {
                 "Status": False,
@@ -586,6 +615,7 @@ def pay(
         return {"Status": False, "Error": "No restaurant session found"}
     if orderPrice is None:
         return {"Status": False, "Error": "Order price not provided"}
+
     try:
         conn, cursor = connect_database()
         connUser, cursorUser = connect_database_user()
@@ -595,10 +625,15 @@ def pay(
         )
         resultUser = cursorUser.fetchall()
         cursor.execute(
-            """SELECT invoicing FROM restaurantConfig WHERE session_token = %s""",
+            """SELECT invoicing,owner_token FROM restaurantConfig WHERE session_token = %s""",
             (token,),
         )
-        resultRestaurant = cursor.fetchall()
+        resultRestaurant = cursor.fetchone()
+        if resultRestaurant[1] == tokenUser:
+            return {
+                "Status": False,
+                "Error": "You cannot pay for your own restaurant."
+            }
         if resultUser[0][0] >= orderPrice:
             cursorUser.execute(
                 """
@@ -637,3 +672,99 @@ def pay(
             cursorUser.close()
         if connUser:
             connUser.close()
+
+@router.put("/api/store/image")
+async def update_store_image(
+    request: Request,
+    image: UploadFile = File(...)
+):
+    conn = None
+    cursor = None
+
+    try:
+        token = request.cookies.get("restaurant_session_token")
+
+        if not token:
+            return {
+                "Status": False,
+                "Error": "No restaurant session found"
+            }
+
+        image_data = await image.read()
+
+        if len(image_data) > 5 * 1024 * 1024:
+            return {
+                "Status": False,
+                "Error": "Image is too large."
+            }
+
+        try:
+            img = Image.open(BytesIO(image_data))
+
+            if img.format != "JPEG":
+                return {
+                    "Status": False,
+                    "Error": "Only JPEG images are allowed."
+                }
+
+            if img.width > 2000 or img.height > 2000:
+                return {
+                    "Status": False,
+                    "Error": "Image dimensions are too large."
+                }
+
+            img.verify()
+
+        except Exception:
+            return {
+                "Status": False,
+                "Error": "Invalid image."
+            }
+
+        Uploads = Path(__file__).resolve().parents[2] / "Uploads"
+        Uploads.mkdir(exist_ok=True)
+
+        extension = Path(image.filename or "").suffix or ".jpg"
+        imageName = f"{uuid.uuid4().hex}{extension}"
+
+        with open(Uploads / imageName, "wb") as f:
+            f.write(image_data)
+
+        conn, cursor = connect_database()
+
+        cursor.execute(
+            """
+            UPDATE restaurantConfig
+            SET image = %s
+            WHERE session_token = %s
+            """,
+            (imageName, token),
+        )
+
+        if cursor.rowcount == 0:
+            return {
+                "Status": False,
+                "Error": "Restaurant not found"
+            }
+
+        conn.commit()
+
+        return {
+            "Status": True,
+            "image": f"http://localhost:8000/uploads/{imageName}"
+        }
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+
+        return {
+            "Status": False,
+            "Error": str(e)
+        }
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()

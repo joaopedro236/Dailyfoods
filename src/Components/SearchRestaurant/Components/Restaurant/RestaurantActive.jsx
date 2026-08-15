@@ -54,22 +54,21 @@ export default function Restaurant({ restaurant, restaurantActive, setRestaurant
                         <h1>Orders</h1>
                         <p className='text-sm cursor-pointer' onClick={() => setRestaurantActive(-1)}>Back</p>
                     </header>
-                    <div className="orders_restaurantActive flex flex-col gap-3 w-full">
-                        {
-                            orders?.map((restaurantMap, index) => (
-                                <div className={`order_restaurantActive flex items-center cursor-pointer gap-4 p-2 w-full`} key={index} onClick={() => {
-                                    setSelectedOrder(prev =>
-                                        prev.some(item => item.name === restaurantMap.name)
-                                            ? prev.filter(item => item.name !== restaurantMap.name)
-                                            : [...prev, restaurantMap]
-                                    )
-                                }}>
-                                    <img src={`http://localhost:8000/uploadsOrders/${restaurantMap?.image}`} alt="orders image" className='w-full max-w-[65px] rounded-lg' />
-                                    <h1>{restaurantMap?.name}</h1>
-                                    <p className='ml-auto text-sm'>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, }).format(restaurantMap?.price ?? 0)}</p>
-                                </div>
-                            ))
-                        }
+                    <div className="orders_restaurantActive flex flex-col gap-3 w-full h-[180px] overflow-y-auto">{
+                        orders?.map((restaurantMap, index) => (
+                            <div className={`order_restaurantActive flex items-center cursor-pointer gap-4 p-2 w-full `} key={index} onClick={() => {
+                                setSelectedOrder(prev =>
+                                    prev.some(item => item.name === restaurantMap.name)
+                                        ? prev.filter(item => item.name !== restaurantMap.name)
+                                        : [...prev, restaurantMap]
+                                )
+                            }}>
+                                <img src={`http://localhost:8000/uploadsOrders/${restaurantMap?.image}`} alt="orders image" className='w-full max-w-[65px] rounded-lg' />
+                                <h1>{restaurantMap?.name}</h1>
+                                <p className='ml-auto text-sm'>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, }).format(restaurantMap?.price ?? 0)}</p>
+                            </div>
+                        ))
+                    }
                     </div>
                     <div className="comments flex flex-col gap-7">
                         <header className='flex '>

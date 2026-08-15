@@ -14,9 +14,22 @@ function App() {
   const [nextStep, setNextStep] = useState(false)
   const [nextStepLoginUser, setNextStepLoginUser] = useState(false)
   const [user, setUser] = useState(false)
-  const[chatbotActive, setChatBotActive] = useState(false)
+  const [chatbotActive, setChatBotActive] = useState(false)
   const [asideOrNavbarItems, setAsideOrNavbarItems] = useState(5)
   const [formDataAPI, setFormDataAPI] = useState({})
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 768px)')
+
+    const handleChange = () => {
+      window.location.reload()
+    }
+
+    media.addEventListener('change', handleChange)
+
+    return () => {
+      media.removeEventListener('change', handleChange)
+    }
+  }, [])
   useEffect(() => {
     async function checkSession() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/store`, {
@@ -92,7 +105,7 @@ function App() {
       <RegisterUser chatBotActive={setChatBotActive} nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setState={setAsideOrNavbarItems} />
       <LoginStore state={asideOrNavbarItems} setNextStep={setNextStep} setState={setAsideOrNavbarItems} setFormDataAPI={setFormDataAPI} />
       <LoginUser nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setNextStep={setNextStep} setState={setAsideOrNavbarItems} />
-      <Chatbot setChatBotActive={setChatBotActive} chatbotActive={chatbotActive}/>
+      <Chatbot setChatBotActive={setChatBotActive} chatbotActive={chatbotActive} />
     </>
   )
 }

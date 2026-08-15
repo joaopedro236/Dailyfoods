@@ -80,7 +80,8 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
             form.append("CNPJ", formData.CNPJ)
             form.append("CEP", formData.CEP)
             form.append("password", formData.password)
-            form.append("restauranttag", JSON.stringify(tags));
+            form.append("restauranttag", tags.join(','));
+            
             const response = await fetch(`${APIURL}/api/registerStore`, {
                 method: 'POST',
                 credentials: 'include',
@@ -90,6 +91,13 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
             const json = await response.json()
             if (!response.ok) {
                 return false
+            }
+            if(json.Error ==='Image is too large.'){
+                alert('Image is too large.')
+            }else if (json.Error === "Only JPEG images are allowed."){
+                alert("Only JPEG images are allowed.")
+            }else if (json.Error === 'Image dimensions are too large.'){
+                alert('Image dimensions are too large.')
             }
             if (json.Status === false) {
                 setNextStep(false)
@@ -186,7 +194,35 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
         APICall()
     }, [state])
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const shouldShowDashboard = nextStep === true || Boolean(formDataAPI?.CNPJ || formDataAPI?.name);
+    const shouldShowDashboard = nextStep === true || Boolean(formDataAPI?.CNPJ || formDataAPI?.name)
+    const [imageInfo, setImageInfo] = useState(null)
+
+    const handleImage = (e) => {
+        const file = e.target.files[0]
+
+        if (!file) return
+
+        const img = new Image()
+
+        img.onload = () => {
+            const sizeMB = file.size / 1024 / 1024
+
+            if (
+                file.type === 'image/jpeg' &&
+                sizeMB <= 5 &&
+                img.width <= 2000 &&
+                img.height <= 2000
+            ) {
+            } else {
+                alert('Image invalid!')
+            }
+
+            URL.revokeObjectURL(img.src)
+        }
+
+        img.src = URL.createObjectURL(file)
+
+    }
     return (
         <>
             <section className={`registerStore w-full  min-h-screen  z-30 px-4 py-2 pt-[90px] items-center justify-center ${state === 2 && !shouldShowDashboard ? 'flex' : 'hidden'} `}>
@@ -257,7 +293,11 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <label htmlFor="image" className='text-sm cursor-pointer'>Restaurant photo</label>
-                                    <input type="file" name="image" id="image" accept="image/*" onChange={handleFileChange} className='bg-transparent p-2 py-2.5 rounded-md w-full' />
+                                    <input type="file" name="image" id="image" accept="image/*" onChange={(e) => {
+                                        e.preventDefault()
+                                        handleFileChange(e)
+                                        handleImage(e)
+                                    }} className='bg-transparent p-2 py-2.5 rounded-md w-full' />
 
                                 </div>
                                 <input type="submit" value={`${submitActive ? 'Loading' : 'Sign up Now'}`} className={`submit__registerStore  text-white rounded-[12px] p-3 cursor-pointer w-full ${submitActive ? 'opacity-85' : ''}`} />
@@ -279,6 +319,15 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                 </div>
             </section>
 
+            {imageInfo && (
+                <div>
+                    <p>Nome: {imageInfo.name}</p>
+                    <p>Tamanho: {imageInfo.size} MB</p>
+                    <p>Tipo: {imageInfo.type}</p>
+                    <p>Largura: {imageInfo.width}px</p>
+                    <p>Altura: {imageInfo.height}px</p>
+                </div>
+            )}
             <DashboardStore formDataAPI={formDataAPI} setFormDataAPI={setFormDataAPI} nextStep={shouldShowDashboard} setNextStep={setNextStep} state={state} previewImage={previewImage} setPreviewImage={setPreviewImage} onImageSelect={updateSelectedImage} />
         </>
     )

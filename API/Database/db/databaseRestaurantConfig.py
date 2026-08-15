@@ -28,7 +28,8 @@ def create_databaseRC():
                 password TEXT NOT NULL,
                 restauranttag TEXT[] NOT NULL DEFAULT '{}',
                 restaurantNote DECIMAL(2,1) DEFAULT 5.0,
-                restaurantComments VARCHAR(500)[] DEFAULT ARRAY[]::VARCHAR(500)[]
+                restaurantComments VARCHAR(500)[] DEFAULT ARRAY[]::VARCHAR(500)[],
+                owner_token UUID
                 )
         ''')
         conn.commit()

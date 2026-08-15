@@ -29,7 +29,7 @@ class Orders(BaseModel):
             orderState=orderState,
             orderComments=[orderComments]
         )
-
+    
 
 class Store(BaseModel):
     name: str = Field(min_length=5, max_length=200)
@@ -74,7 +74,9 @@ class Store(BaseModel):
             orders=int(orders),
             completed=int(completed),
             progress=int(progress),
-            password=password
+            password=password,
+
+            restauranttag=[restauranttag]
         )
 
 

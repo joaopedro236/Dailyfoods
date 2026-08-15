@@ -9,7 +9,7 @@ export default function RegisterNS({
     state,
     setState,
     handleForm,
-    formData,
+    formData,userInformations,
     handleFormEdit,
     stateSection,
     CNPJExists,
@@ -43,6 +43,7 @@ export default function RegisterNS({
 
         APICall()
     }, [])
+    
     return (
         <>
             <section className={`registerNS ${state == true && stateSection == 5 ? 'flex' : 'hidden'} ${user == true ? '!hidden' : ''} bg-white w-full h-screen  pt-7 `}>
@@ -90,6 +91,7 @@ export default function RegisterNS({
                 user={user}
                 formData={userData}
                 stateSection={stateSection}
+                userInformations={userInformations}
                 chatBotActive={chatBotActive}
             />
         </>

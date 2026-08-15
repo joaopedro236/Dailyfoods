@@ -21,6 +21,7 @@ export default function OrderActive({ selectedOrder, setSelectedOrder }) {
             if(data.Status) {setSelectedOrder([])
                 alert('Pay success')
             }
+            if(data.Error == "You cannot pay for your own restaurant.") alert('You cannot pay for your own restaurant.')
         }
         catch (error) {
             console.error(error)
@@ -50,7 +51,7 @@ export default function OrderActive({ selectedOrder, setSelectedOrder }) {
     return (
         <>
             <section className={`orderActive ${selectedOrder.length > 0 ? 'flex' : 'hidden'} bg-white  fixed top-0 left-0 w-full h-screen flex-col p-3 pt-[70px] gap-2`}>
-                <header className='w-full flex flex-col gap-5 '>
+                <header className=' flex flex-col gap-5 '>
                     <h1 >Order: </h1>
                     <div className='flex w-full flex-wrap gap-4 items-center ml-4'>
                         <img
