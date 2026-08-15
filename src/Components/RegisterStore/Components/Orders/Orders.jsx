@@ -35,15 +35,51 @@ export default function Orders({ stateSection, setOrdersSectionActive, OrdersSec
                 setOrdersSectionActive(false);
                 return
             }
-
+            if (dataResponse?.Error === 'Image is too large.') {
+                alert('Image is too large.')
+            } else if (dataResponse?.Error === "Only JPEG images are allowed.") {
+                alert("Only JPEG images are allowed.")
+            } else if (dataResponse?.Error === 'Image dimensions are too large.') {
+                alert('Image dimensions are too large.')
+            }
             console.error('Create order failed', response.ok, dataResponse)
             alert(`Could not create the order. ${dataResponse?.Error || dataResponse?.detail || 'Please try again.'}`)
         }
-        catch(error){
+        catch (error) {
             console.error(error)
-        }finally{
+        } finally {
             setLoading(false)
         }
+    }
+    const [imageInfo, setImageInfo] = useState(null)
+
+    const handleImage = (e) => {
+        const file = e.target.files[0]
+
+        if (!file) return
+
+        const img = new Image()
+
+        img.onload = () => {
+            const sizeMB = file.size / 1024 / 1024
+
+            if (
+                file.type === 'image/jpeg' &&
+                sizeMB <= 5 &&
+                img.width <= 2000 &&
+                img.height <= 2000
+            ) {
+                setImageInfo(file)
+            } else {
+                alert('Image invalid!')
+                e.target.value = ''
+                setImageInfo(null)
+            }
+
+            URL.revokeObjectURL(img.src)
+        }
+
+        img.src = URL.createObjectURL(file)
     }
     return (
         <>
@@ -56,13 +92,13 @@ export default function Orders({ stateSection, setOrdersSectionActive, OrdersSec
                         <h1 className='text-[23px]'>Create Menu</h1>
                     </header>
                     <div className="inputs_ordersCreate flex-1 flex w-full flex-col mt-1">
-                        <form encType="multipart/form-data"  className='p-2 flex flex-1 flex-col h-full justify-between' onSubmit={handleSubmit}>
+                        <form encType="multipart/form-data" className='p-2 flex flex-1 flex-col h-full justify-between' onSubmit={handleSubmit}>
                             <div className="inputForm_orders flex flex-col gap-6 h-full justify-center">
                                 {
                                     inputs.map((inputsMap) => (
                                         <div key={inputsMap.id} className='form_ordersCreate flex gap-0.5 w-full flex-col '>
                                             <label htmlFor={inputsMap.name} className='text-sm'>{inputsMap.label}</label>
-                                            <input type={inputsMap.type} disabled={loading} name={inputsMap?.name} placeholder={inputsMap?.placeholder} className='bg-transparent p-2 py-2.5 rounded-md w-full' accept={inputsMap?.accept} minLength={inputsMap?.minLength} maxLength={inputsMap?.maxLength} required />
+                                            <input type={inputsMap.type} onChange={inputsMap.name === 'image_orders' ? handleImage : undefined} disabled={loading} name={inputsMap?.name} placeholder={inputsMap?.placeholder} className='bg-transparent p-2 py-2.5 rounded-md w-full' accept={inputsMap?.accept} minLength={inputsMap?.minLength} maxLength={inputsMap?.maxLength} required />
                                         </div>
                                     ))
                                 }

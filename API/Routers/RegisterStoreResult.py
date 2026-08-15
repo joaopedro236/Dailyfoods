@@ -29,7 +29,7 @@ router = APIRouter()
 
 @router.post("/api/registerStore")
 async def register_store(
-    request:Request,
+    request: Request,
     response: Response,
     data: Store = Depends(Store.as_form),
     image: UploadFile = File(None),
@@ -42,6 +42,7 @@ async def register_store(
     Uploads = Path(__file__).resolve().parents[2] / "Uploads"
     Uploads.mkdir(exist_ok=True)
     user_token = request.cookies.get("user_session_token")
+
     async def save_image(file: UploadFile, folder: Path):
         filename = file.filename or "upload"
         extension = Path(filename).suffix or ".jpg"
@@ -163,7 +164,7 @@ async def register_store(
                     data.progress,
                     hash_password,
                     data.restauranttag,
-                    user_token
+                    user_token,
                 ),
             )
             conn.commit()
@@ -433,29 +434,47 @@ async def orders(
         UploadsOrders.mkdir(exist_ok=True)
         if restaurantComments and not orderName:
             conn, cursor = connect_database()
-
             cursor.execute(
                 """
-                UPDATE restaurantConfig
-                SET restaurantComments = array_append(
-                    COALESCE(restaurantComments, ARRAY[]::text[]),
-                    %s
-                )
-                WHERE id= %s
-            """,
-                (restaurantComments, restaurantId),
+        UPDATE restaurantConfig
+        SET restaurantComments = array_append(
+            COALESCE(restaurantComments, ARRAY[]::text[]),
+            %s
+        )
+        WHERE  session_token = %s
+        """,
+                (restaurantComments, token),
             )
 
             conn.commit()
             return {"Status": True}
+
         if image_orders is None:
             return {"Status": False, "Error": "No image provided"}
 
-        extension = Path(image_orders.filename).suffix
-        image_name = f"{uuid.uuid4().hex}{extension}"
+        image_data = await image_orders.read()
+
+        if len(image_data) > 5 * 1024 * 1024:
+            return {"Status": False, "Error": "Image is too large."}
+
+        try:
+            img = Image.open(BytesIO(image_data))
+
+            if img.format != "JPEG":
+                return {"Status": False, "Error": "Only JPEG images are allowed."}
+
+            if img.width > 2000 or img.height > 2000:
+                return {"Status": False, "Error": "Image dimensions are too large."}
+
+            img.verify()
+
+        except Exception:
+            return {"Status": False, "Error": "Invalid image."}
+
+        image_name = f"{uuid.uuid4().hex}.jpg"
 
         with open(UploadsOrders / image_name, "wb") as f:
-            f.write(await image_orders.read())
+            f.write(image_data)
 
         conn, cursor = connect_database()
 
@@ -630,10 +649,7 @@ def pay(
         )
         resultRestaurant = cursor.fetchone()
         if resultRestaurant[1] == tokenUser:
-            return {
-                "Status": False,
-                "Error": "You cannot pay for your own restaurant."
-            }
+            return {"Status": False, "Error": "You cannot pay for your own restaurant."}
         if resultUser[0][0] >= orderPrice:
             cursorUser.execute(
                 """
@@ -673,11 +689,9 @@ def pay(
         if connUser:
             connUser.close()
 
+
 @router.put("/api/store/image")
-async def update_store_image(
-    request: Request,
-    image: UploadFile = File(...)
-):
+async def update_store_image(request: Request, image: UploadFile = File(...)):
     conn = None
     cursor = None
 
@@ -685,41 +699,26 @@ async def update_store_image(
         token = request.cookies.get("restaurant_session_token")
 
         if not token:
-            return {
-                "Status": False,
-                "Error": "No restaurant session found"
-            }
+            return {"Status": False, "Error": "No restaurant session found"}
 
         image_data = await image.read()
 
         if len(image_data) > 5 * 1024 * 1024:
-            return {
-                "Status": False,
-                "Error": "Image is too large."
-            }
+            return {"Status": False, "Error": "Image is too large."}
 
         try:
             img = Image.open(BytesIO(image_data))
 
             if img.format != "JPEG":
-                return {
-                    "Status": False,
-                    "Error": "Only JPEG images are allowed."
-                }
+                return {"Status": False, "Error": "Only JPEG images are allowed."}
 
             if img.width > 2000 or img.height > 2000:
-                return {
-                    "Status": False,
-                    "Error": "Image dimensions are too large."
-                }
+                return {"Status": False, "Error": "Image dimensions are too large."}
 
             img.verify()
 
         except Exception:
-            return {
-                "Status": False,
-                "Error": "Invalid image."
-            }
+            return {"Status": False, "Error": "Invalid image."}
 
         Uploads = Path(__file__).resolve().parents[2] / "Uploads"
         Uploads.mkdir(exist_ok=True)
@@ -742,26 +741,17 @@ async def update_store_image(
         )
 
         if cursor.rowcount == 0:
-            return {
-                "Status": False,
-                "Error": "Restaurant not found"
-            }
+            return {"Status": False, "Error": "Restaurant not found"}
 
         conn.commit()
 
-        return {
-            "Status": True,
-            "image": f"http://localhost:8000/uploads/{imageName}"
-        }
+        return {"Status": True, "image": f"http://localhost:8000/uploads/{imageName}"}
 
     except Exception as e:
         if conn:
             conn.rollback()
 
-        return {
-            "Status": False,
-            "Error": str(e)
-        }
+        return {"Status": False, "Error": str(e)}
 
     finally:
         if cursor:

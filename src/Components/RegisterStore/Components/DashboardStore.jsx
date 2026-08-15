@@ -79,9 +79,16 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
             const data = await response.json()
 
             if (!response.ok || !data.Status) {
+                if (data.Error === 'Image is too large.') {
+                    alert('Image is too large.')
+                } else if (data.Error === 'Only JPEG images are allowed.') {
+                    alert('Only JPEG images are allowed.')
+                } else if (data.Error === 'Image dimensions are too large.') {
+                    alert('Image dimensions are too large.')
+                }
+
                 throw new Error(data.Error || `Request error: ${response.status}`)
             }
-
             onImageSelect(file)
 
             if (data.image) {
@@ -222,15 +229,17 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
                 img.width <= 2000 &&
                 img.height <= 2000
             ) {
+                setImageInfo(file)
             } else {
                 alert('Image invalid!')
+                e.target.value = ''
+                setImageInfo(null)
             }
 
             URL.revokeObjectURL(img.src)
         }
 
         img.src = URL.createObjectURL(file)
-
     }
     return (
         <>

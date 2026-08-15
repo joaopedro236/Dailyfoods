@@ -18,7 +18,7 @@ function App() {
   const [asideOrNavbarItems, setAsideOrNavbarItems] = useState(5)
   const [formDataAPI, setFormDataAPI] = useState({})
   useEffect(() => {
-    const media = window.matchMedia('(min-width: 768px)')
+    const media = window.matchMedia('(min-width: 1024px)')
 
     const handleChange = () => {
       window.location.reload()

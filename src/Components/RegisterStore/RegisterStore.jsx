@@ -81,7 +81,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
             form.append("CEP", formData.CEP)
             form.append("password", formData.password)
             form.append("restauranttag", tags.join(','));
-            
+
             const response = await fetch(`${APIURL}/api/registerStore`, {
                 method: 'POST',
                 credentials: 'include',
@@ -89,15 +89,16 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                 body: form
             })
             const json = await response.json()
-            if (!response.ok) {
-                return false
-            }
-            if(json.Error ==='Image is too large.'){
-                alert('Image is too large.')
-            }else if (json.Error === "Only JPEG images are allowed."){
-                alert("Only JPEG images are allowed.")
-            }else if (json.Error === 'Image dimensions are too large.'){
-                alert('Image dimensions are too large.')
+            if (!response.ok || !data.Status) {
+                if (data.Error === 'Image is too large.') {
+                    alert('Image is too large.')
+                } else if (data.Error === 'Only JPEG images are allowed.') {
+                    alert('Only JPEG images are allowed.')
+                } else if (data.Error === 'Image dimensions are too large.') {
+                    alert('Image dimensions are too large.')
+                }
+
+                throw new Error(data.Error || `Request error: ${response.status}`)
             }
             if (json.Status === false) {
                 setNextStep(false)
@@ -213,15 +214,17 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                 img.width <= 2000 &&
                 img.height <= 2000
             ) {
+                setImageInfo(file)
             } else {
                 alert('Image invalid!')
+                e.target.value = ''
+                setImageInfo(null)
             }
 
             URL.revokeObjectURL(img.src)
         }
 
         img.src = URL.createObjectURL(file)
-
     }
     return (
         <>
