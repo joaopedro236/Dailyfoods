@@ -49,7 +49,7 @@ export default function LoginUser({ state, setState, setUser, setNextStep }) {
     }
     return (
         <>
-            <section className={`loginUser ${state == 3 ? 'flex' : 'hidden'} bg-white w-full h-screen p-3 pt-[90px] justify-center flex-col gap-7`}>
+            <section className={`loginUser ${state == 4 ? 'flex' : 'hidden'} bg-white w-full h-screen p-3 pt-[90px] justify-center flex-col gap-7`}>
                 <header>
                     <h1>Login User</h1>
                 </header>

@@ -1,6 +1,7 @@
 import Navbar from "./Components/Navbar/Navbar"
 import { Routes, Route } from 'react-router-dom'
 import Aside from './Components/Aside/Aside'
+import BanBruteForce from "./Components/BanBruteForce/BanBruteForce"
 import { useNavigate } from 'react-router-dom'
 import RegisterStore from './Components/RegisterStore/RegisterStore'
 import RegisterUser from './Components/RegisterUser/RegisterUser'
@@ -74,8 +75,30 @@ function App() {
   useEffect(() => {
     setAsideOrNavbarItems(user ? 1 : 5)
   }, [user])
+  const [banBruteForce, setBanBruteForce] = useState(false)
+  const handleBanBruteForce = async () => {
+    try {
+      const responseBBF = await fetch(`${import.meta.env.VITE_API_URL}/ban_verification`, {
+        method: "POST",
+        credentials: "include",
+      })
+      const josnBBF = await responseBBF.json()
+      if (josnBBF.Ban) {
+        setBanBruteForce(true)
+      }
+      else {
+        setBanBruteForce(false)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  useEffect(() => {
+    handleBanBruteForce()
+  }, [])
   return (
     <>
+      <BanBruteForce ban={banBruteForce} />
       <Navbar state={asideOrNavbarItems} setState={setAsideOrNavbarItems} user={user} onHome={handleHome} />
       <Aside state={asideOrNavbarItems} setState={setAsideOrNavbarItems} user={user} onHome={handleHome} />
       <Routes>
@@ -108,6 +131,6 @@ function App() {
       <Chatbot setChatBotActive={setChatBotActive} chatbotActive={chatbotActive} />
     </>
   )
-}
 
+}
 export default App

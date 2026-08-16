@@ -39,8 +39,8 @@ EXISTS(SELECT 1 FROM users_Dailyfoods WHERE LOWER(TRIM(email)) = %s)
         
         return {"CNPJExist": bool(result), "emailExists": bool(resultEmail)}
 
-    except Exception as e:
-        raise e
+    except Exception :
+        raise 'Error'
     finally:
         if cursor:
             cursor.close()

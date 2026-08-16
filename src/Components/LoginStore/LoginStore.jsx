@@ -1,19 +1,25 @@
 import './LoginStore.css'
+import BanBruteForce from '../BanBruteForce/BanBruteForce';
 import { useEffect, useState } from 'react'
 export default function LoginStore({ state, setState, setNextStep, setFormDataAPI }) {
     const APIURL = import.meta.env.VITE_API_URL
     const [CNPJ, setCNPJ] = useState("");
+    const [ban, setBan] = useState(false)
+    const [loading, setLoading] = useState(false);
 
     const [password, setPassword] = useState("");
     const handleLogin = async (e) => {
         e.preventDefault()
+        if (loading) return;
+
+        setLoading(true);
         try {
             const response = await fetch(`${APIURL}/api/loginStore`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                },
-                credentials: "include",
+                    },
+                    credentials: "include",
                 body: JSON.stringify({
                     CNPJ,
                     password,
@@ -21,6 +27,8 @@ export default function LoginStore({ state, setState, setNextStep, setFormDataAP
             });
 
             const data = await response.json();
+            if (data.Ban) setBan(true)
+            else setBan(false)
             if (data.Status) {
 
                 if (data.token) {
@@ -55,10 +63,13 @@ export default function LoginStore({ state, setState, setNextStep, setFormDataAP
         catch (error) {
             console.error(error)
         }
+        finally{
+            setLoading(false)
+        }
     }
     return (
         <>
-            <section className={`loginStore flex-col p-3 pt-[80px] w-full gap-[30px]  h-screen justify-center ${state == 4 ? 'flex' : 'hidden'} ${status ? 'items-center' : ''}`}>
+            <section className={`loginStore flex-col p-3 pt-[80px] w-full gap-[30px]  h-screen justify-center ${state == 3 ? 'flex' : 'hidden'} ${status ? 'items-center' : ''}`}>
                 <header className={` flex-col `}>
                     <h1>Login Restaurant</h1>
                 </header>
@@ -79,12 +90,11 @@ export default function LoginStore({ state, setState, setNextStep, setFormDataAP
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     <p className='text-sm text-blue-600 cursor-pointer'>I forgot the password.</p>
-                    <button type="submit" className='submit_loginStore p-3 rounded-lg text-white '>
-                        Entrar
+                    <button type="submit" className='submit_loginStore p-3 rounded-lg text-white ' disabled={loading}>
+                        {loading ? 'Loading' : 'Set'}
                     </button>
                 </form>
             </section>
-
         </>
     )
 }

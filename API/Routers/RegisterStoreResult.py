@@ -79,11 +79,7 @@ async def register_store(
             if "BLOCK" in result:
                 return {"Status": False, "Error": "Invalid restaurant name."}
         except Exception as e:
-            return {
-                "Status": False,
-                "Error": "Unable to validate restaurant name.",
-                "ErrorGross": str(e),
-            }
+            return {"Status": False, "Error": "Unable to validate restaurant name."}
         if image:
             image_data = await image.read()
 
@@ -188,15 +184,10 @@ async def register_store(
             "image": image_url,
         }
 
-    except Exception as e:
+    except Exception:
         if conn:
             conn.rollback()
-        return {
-            "Status": False,
-            "token": session_token,
-            "image": image_url,
-            "warning": str(e),
-        }
+        return {"Status": False, "token": session_token, "image": image_url}
     finally:
         if cursor:
             cursor.close()
@@ -290,7 +281,7 @@ def get_store(
             }
         return {"Status": False}
     except Exception as e:
-        return {"Status": False, "Error": str(e)}
+        return {"Status": False, "Error": "Error"}
     finally:
         if cursor:
             cursor.close()
@@ -325,8 +316,8 @@ def restaurants():
             for row in rows
         ]
         return {"result": result}
-    except Exception as e:
-        raise e
+    except Exception:
+        return "Error"
     finally:
         if cursor:
             cursor.close()
@@ -373,10 +364,10 @@ WHERE CNPJ = %s
         )
         conn.commit()
         return {"Status": True, "orders": result[1], "invoicing_history": result[0]}
-    except Exception as e:
+    except Exception:
         if conn:
             conn.rollback()
-        return {"Status": False, "Error": str(e)}
+        return {"Status": False, "Error": "Error"}
 
     finally:
         if cursor:
@@ -423,12 +414,8 @@ async def orders(
 
                     if result == "BLOCK":
                         return {"Status": False, "Error": "Invalid comment."}
-        except Exception as e:
-            return {
-                "Status": False,
-                "Error": "Unable to validate restaurant name.",
-                "ErrorGross": str(e),
-            }
+        except Exception:
+            return {"Status": False, "Error": "Unable to validate restaurant name."}
 
         UploadsOrders = Path(__file__).resolve().parents[2] / "UploadsOrders"
         UploadsOrders.mkdir(exist_ok=True)
@@ -496,15 +483,11 @@ orderState = array_append(COALESCE(orderState, ARRAY[]::boolean[]), %s)
 
         return {"Status": True}
 
-    except Exception as e:
+    except Exception:
         if conn:
             conn.rollback()
-        return {"Status": False, "Error": str(e)}
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        return {"Status": False, "Error": "Error"}
+  
 
 
 @router.get("/orders_items")
@@ -546,8 +529,36 @@ def orders_items(request: Request, restaurant_session_token: str | None = None):
             )
 
         return {"Status": True, "orders": orders, "orderPriceMean": orderPriceMean}
-    except Exception as e:
-        return {"Status": False, "Error": str(e)}
+    except Exception:
+        return {"Status": False, "Error": "Error"}
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def ban(conn,cursor, token):
+    try:
+        
+        cursor.execute(
+            """
+            UPDATE users_Dailyfoods 
+            SET Ban = True
+            WHERE session_token = %s""",
+            (token,),
+        )
+        cursor.execute(
+            """
+        UPDATE users_Dailyfoods
+        SET timeBan = NOW() + INTERVAL '1 day'
+        WHERE session_token = %s""",
+            (token,),
+        )
+        conn.commit()
+        return {"Status": False, "Ban": True}
+    except Exception:
+        return {"Status": False, "Ban": True}
     finally:
         if cursor:
             cursor.close()
@@ -556,17 +567,38 @@ def orders_items(request: Request, restaurant_session_token: str | None = None):
 
 
 @router.post("/api/loginStore")
-def login_Store(data: LoginStore, response: Response):
+def login_Store(data: LoginStore, response: Response, request: Request):
     conn = None
     cursor = None
+    connUser = None
+    cursorUser = None
+    tokenUser = request.cookies.get("user_session_token")
     try:
         conn, cursor = connect_database()
+        connUser, cursorUser = connect_database_user()
         cursor.execute(
             "SELECT password, session_token FROM restaurantConfig WHERE CNPJ = %s",
             (data.CNPJ,),
         )
         restaurant = cursor.fetchone()
         if not restaurant:
+            cursorUser.execute(
+                """
+            UPDATE users_Dailyfoods
+            SET AttemptsLogin = AttemptsLogin +1 
+            WHERE session_token = %s""",
+                (tokenUser,),
+            )
+            connUser.commit()
+            cursorUser.execute(
+                "SELECT AttemptsLogin from users_Dailyfoods WHERE session_token = %s",
+                (tokenUser,),
+            )
+            responseCursor = cursorUser.fetchall()
+
+            if responseCursor and responseCursor[0][0] >= 20:
+                ban(connUser, cursorUser, tokenUser)
+                return {"Status": False, "Ban": True}
             return {"Status": False}
         ph.verify(restaurant[0], data.password)
         response.set_cookie(
@@ -581,12 +613,30 @@ def login_Store(data: LoginStore, response: Response):
         return {"Status": True, "token": restaurant[1]}
 
     except VerifyMismatchError:
+        cursorUser.execute(
+            """
+            UPDATE users_Dailyfoods
+            SET AttemptsLogin = AttemptsLogin + 1
+            WHERE session_token = %s
+            """,
+            (tokenUser,),
+        )
+        connUser.commit()
+        cursorUser.execute(
+            """
+            SELECT AttemptsLogin
+            FROM users_Dailyfoods
+            WHERE session_token = %s
+            """,
+            (tokenUser,),
+        )
+
+        attempts = cursorUser.fetchone()[0]
+
+        if attempts >= 20:
+            return ban(connUser,cursorUser, tokenUser)
+
         return {"Status": False}
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 
 @router.post("/addMoney")
@@ -612,8 +662,8 @@ def add_money(request: Request):
             return {"Status": False, "Error": "Restaurant not found"}
         conn.commit()
         return {"Status": True, "result": result[0]}
-    except Exception as e:
-        return {"Status": False, "Error": str(e)}
+    except Exception:
+        return {"Status": False, "Error": "Error"}
     finally:
         cursor.close()
         conn.close()
@@ -677,8 +727,8 @@ def pay(
                 "Status": False,
                 "Error": "Unfortunately, the user does not have a sufficient balance.",
             }
-    except Exception as e:
-        return {"Status": False, "Error": str(e)}
+    except Exception:
+        return {"Status": False, "Error": "Error"}
     finally:
         if cursor:
             cursor.close()
@@ -747,14 +797,27 @@ async def update_store_image(request: Request, image: UploadFile = File(...)):
 
         return {"Status": True, "image": f"http://localhost:8000/uploads/{imageName}"}
 
-    except Exception as e:
+    except Exception:
         if conn:
             conn.rollback()
 
-        return {"Status": False, "Error": str(e)}
+        return {"Status": False, "Error": "Error"}
 
     finally:
         if cursor:
             cursor.close()
         if conn:
             conn.close()
+
+@router.post('/ban_verification')
+def ban_verification(request: Request):
+    conn = None
+    cursor = None
+    tokenUser = request.cookies.get("user_session_token")
+    try:
+        conn,cursor = connect_database_user()
+        cursor.execute("SELECT Ban from users_Dailyfoods WHERE session_token = %s", (tokenUser, ))
+        response = cursor.fetchone()
+        if response: return{"Status": True, 'Ban': True} 
+    except Exception:
+        return{"Status": False, "Error": 'Error'}

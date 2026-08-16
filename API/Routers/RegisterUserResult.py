@@ -50,11 +50,10 @@ def register_user(data: User, response: Response):
 
             if result.startswith("BLOCK"):
                 return {"Status": False, "Error": "Invalid name."}
-        except Exception as e:
+        except Exception :
             return {
                 "Status": False,
                 "Error": "Unable to validate  name.",
-                "ErrorGross": str(e),
             }
         cnpj_exist = dataResponse["CNPJExist"]
         email_exist = dataResponse["emailExists"]
@@ -116,7 +115,7 @@ def get_user(
             return {"Status": True, "name": userData[0], "email": userData[1], "money": userData[2], "purchasedOrders": userData[3]}
         return {"Status": False}
     except Exception as e:
-        return {"Status": False, "Error": str(e)}
+        return {"Status": False, "Error": 'Error'}
     finally:
         if cursor:
             cursor.close()
@@ -152,5 +151,5 @@ def login_user(data: LoginUser, response: Response):
         )
         return {"Status": True, "token": User[1]}
 
-    except Exception as e:
-        return {"Error": e, "Status": False}
+    except Exception :
+        return {"Error": 'Error', "Status": False}

@@ -28,4 +28,4 @@ def chatbot(data: ChatbotValidation):
 
         return {"Status": True, "Response": result}
     except Exception as e:
-        return {"Status": False, "Error": str(e)}
+        return {"Status": False, "Error": 'Error'}

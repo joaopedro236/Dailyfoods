@@ -78,6 +78,14 @@
         flex-direction: initial;
         flex-wrap: wrap;
     }
+    .cards {
+        display: flex;
+        gap:25px;
+        max-width: 600px;
+    }
+    .cards div {
+        max-width: 160px;
+    }
     .user nav {
         display: flex;
     }

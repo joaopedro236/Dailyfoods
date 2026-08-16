@@ -96,7 +96,7 @@ def register_store(data: Store = Depends(Store.as_form)):
         return {"cnpj": data.CNPJ, "cnpjExist": cnpj_exists}
 
     except Exception as e:
-        return {"cnpj": "", "cnpjExist": False, "error": str(e)}
+        return {"cnpj": "", "cnpjExist": False, "error":'Error'}
     finally:
         if cursor:
             cursor.close()

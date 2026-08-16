@@ -28,7 +28,7 @@ def garbage_upload():
                 if fileOrders.is_file() and fileOrders.name not in imagesOrders and fileOrders.name != '813789.png':
                     fileOrders.unlink()
     except Exception as e:
-        raise Exception(f'Error: { str(e)}')
+        raise Exception('Error')
     finally:
         if cursor:
             cursor.close()

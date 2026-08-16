@@ -17,7 +17,9 @@ def create_database():
                 CEP CHAR(9) NOT NULL,
                 session_token UUID NOT NULL,
                 money DECIMAL(10, 2) DEFAULT 0.0 NOT NULL,
-                purchasedOrders INT DEFAULT 0 NOT NULL
+                purchasedOrders INT DEFAULT 0 NOT NULL,
+                Ban BOOL DEFAULT false,
+                AttemptsLogin INT DEFAULT 0
             )
         """)
         conn.commit()

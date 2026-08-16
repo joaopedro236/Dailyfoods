@@ -77,7 +77,7 @@ export default function User({ user, formData, userInformations, stateSection, c
                     </div>
                 </div>
                 <h1 className='ml-5'>Informations</h1>
-                <div className="cards grid w-full grid-cols-2 place-items-center p-5">
+                <div className="cards grid w-fullyy grid-cols-2 place-items-center p-5">
                     {cards.map((cardsMap) => (
                         <div className="w-full flex justify-center items-center" key={cardsMap.id}>
                             < Card formData={userInformations}title={cardsMap.title} name={cardsMap?.name} icon={cardsMap.icon} />
