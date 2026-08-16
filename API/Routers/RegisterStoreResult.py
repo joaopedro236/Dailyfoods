@@ -818,6 +818,7 @@ def ban_verification(request: Request):
         conn,cursor = connect_database_user()
         cursor.execute("SELECT Ban from users_Dailyfoods WHERE session_token = %s", (tokenUser, ))
         response = cursor.fetchone()
-        if response: return{"Status": True, 'Ban': True} 
+        if response and response[0] is True: return{"Status": True, 'Ban': True} 
+        return {"Status": True, "Ban": False}
     except Exception:
         return{"Status": False, "Error": 'Error'}

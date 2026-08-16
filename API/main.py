@@ -3,7 +3,9 @@ from API.Database.db.databaseUsers import create_database
 from API.Validation.RegisterStore import router as registerStore_verification
 from API.Validation.RegisterUser import router as registerUser_verification  
 from API.Routers.RegisterStoreResult import router as registerStore_result
-from API.Routers.RegisterUserResult import router as registerUser_result
+from API.Routers.RegisterUser.get_user import router as get_user
+from API.Routers.RegisterUser.RegisterUser import router as RegisterUser
+from API.Routers.RegisterUser.login_user import router as login_user
 from API.Validation.GarbageUpload import garbage_upload 
 from API.Routers.chatbot import router as chatbot
 from fastapi import FastAPI
@@ -34,8 +36,10 @@ if uploads_orders_path.exists():
 app.include_router(registerStore_verification)
 app.include_router(registerStore_result)
 app.include_router(registerUser_verification)
-app.include_router(registerUser_result)
 app.include_router(chatbot)
+app.include_router(get_user)
+app.include_router(RegisterUser)
+app.include_router(login_user)
 @app.on_event('startup')
 def startup():
     create_database()
