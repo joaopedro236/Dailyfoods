@@ -72,7 +72,7 @@ export default function OrderActive({ selectedOrder, setSelectedOrder }) {
                 <button className='w-full max-w-[450px] p-3 rounded-lg text-white mt-8' onClick={handlePay} disabled={loading}>
                     {loading ? 'Loading' : 'Pay'}
                 </button>
-                <p className='text-sm mt-4'>Press Ctrl + B to go back.</p>
+                <p className='text-sm mt-4' onClick={()=> setSelectedOrder([])}>Press Ctrl + B to go back or click on me.</p>
             </section>
         </>
     )

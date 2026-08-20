@@ -25,8 +25,8 @@
         placeholder: 'Enter Your CEP',
         label: 'CEP',
         type: 'text',
-        minLength: 5,
-        maxLength: 250
+        minLength: 3,
+        maxLength: 8
     },
     {
         id:4,

@@ -6,7 +6,7 @@ const inputs = [
         formData:'name',
         type: 'text',
         placeholder: 'Enter Your Name',
-        minLength: 20,
+        minLength: 5,
         maxLength: 250,
     },
     {
@@ -26,8 +26,8 @@ const inputs = [
         label: 'CEP',
         formData:'CEP',
         type: 'text',
-        minLength: 5,
-        maxLength: 250
+        minLength: 8,
+        maxLength: 8
     },
     {
         id: 4,
@@ -36,7 +36,7 @@ const inputs = [
         label: 'Password',
         formData:'password',
         type: 'password',
-        minLength: 10,
+        minLength: 6,
         maxLength: 200
     },
 ]

@@ -46,7 +46,7 @@ export default function RegisterNS({
     
     return (
         <>
-            <section className={`registerNS ${state == true && stateSection == 5 ? 'flex' : 'hidden'} ${user == true ? '!hidden' : ''} bg-white w-full h-screen  pt-7 `}>
+            <section className={`registerNS ${state == true && stateSection == 4 ? 'flex' : 'hidden'} ${user == true ? '!hidden' : ''} bg-white w-full h-screen  pt-7 `}>
                 <div className="cardRegisterNS w-full max-w-[720px] rounded-[16px] relative flex flex-col py-7  px-10 gap-4 h-full max-h-[580px]">
                     <header className='flex flex-col text-center items-center justify-center gap-0.5'>
                         <h1 className='text-[19px]'>It's great to see you here!</h1>

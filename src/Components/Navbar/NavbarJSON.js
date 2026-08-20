@@ -15,10 +15,6 @@ const ItemsNavbar = [
     },
     {
         id:4,
-        name:'User Store'
-    },
-    {
-        id:5,
         name:'Account'
     },
 ]

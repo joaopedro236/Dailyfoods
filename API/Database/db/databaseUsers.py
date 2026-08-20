@@ -14,12 +14,13 @@ def create_database():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 password VARCHAR(200) NOT NULL,
                 CNPJ CHAR(14)  UNIQUE NOT NULL,
-                CEP CHAR(9) NOT NULL,
+                CEP CHAR(8) NOT NULL,
                 session_token UUID NOT NULL,
                 money DECIMAL(10, 2) DEFAULT 0.0 NOT NULL,
                 purchasedOrders INT DEFAULT 0 NOT NULL,
                 Ban BOOL DEFAULT false,
-                AttemptsLogin INT DEFAULT 0
+                AttemptsLogin INT DEFAULT 0,
+                AttemptsLoginUser INT NOT NULL DEFAULT 0 
             )
         """)
         conn.commit()

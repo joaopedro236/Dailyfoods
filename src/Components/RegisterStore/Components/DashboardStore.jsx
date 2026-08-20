@@ -352,6 +352,12 @@ export default function DashboardStore({ formDataAPI, state, setFormDataAPI, nex
                         </header>
                         <button className='text-white w-full rounded-lg p-4' onClick={addMoney}>To Add</button>
                     </div>
+                    <div className="locality flex flex-col gap-5 p-3 items-center h-[500px] justify-center m-auto w-full max-w-[600px]">
+                        <header>
+                            <h1>Google Maps</h1>
+                        </header>
+                        <iframe src={`https://www.google.com/maps?q=${formDataAPI?.latitude},${formDataAPI?.longitude}&output=embed`}  className='border-0 w-full h-full rounded-lg' allowFullScreen loading='lazy'></iframe>
+                    </div>
                 </div>
             </section >
             <Orders stateSection={state}

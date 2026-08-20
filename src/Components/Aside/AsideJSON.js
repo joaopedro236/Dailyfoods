@@ -21,13 +21,9 @@ const bottomNavbarItems = [
         id:3,
         name:'Login Store',
         image:iconLogin
-    },{
-        id:4,
-        name:'User Store',
-        image:iconLogin
     },
     {
-        id:5,
+        id:4,
         name:'Account',
         image:iconAccount
     }

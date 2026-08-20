@@ -22,8 +22,9 @@
     .submit__login:hover {
         opacity: 85%;
     }
-
-
+    .login_registerUser:hover {
+        color: var(--primary-red);
+    }
 
 
     .cardLogin input::placeholder {

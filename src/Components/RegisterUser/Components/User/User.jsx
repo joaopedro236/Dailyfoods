@@ -31,7 +31,7 @@ export default function User({ user, formData, userInformations, stateSection, c
     }, [])
     return (
         <>
-            <section className={`user w-full z-[80] h-screen flex-col ${user == true && stateSection == 5 ? 'flex' : 'hidden'}`}>
+            <section className={`user w-full z-[80] h-screen flex-col ${user == true && stateSection == 4 ? 'flex' : 'hidden'}`}>
                 <nav className='p-2 pl-3 hidden items-start w-full items-center justify-between px-6'>
                     <header>
                         <h1 className='text-black'>Hello, {firstname}!👍</h1>

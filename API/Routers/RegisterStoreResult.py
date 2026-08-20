@@ -1,4 +1,5 @@
 from ..Database.Config.connectDatabaseRestaurantConfig import connect_database
+from urllib.parse import quote
 from fastapi import (
     APIRouter,
     Form,
@@ -16,7 +17,7 @@ from io import BytesIO
 from ..Database.Config.connectDatabaseUser import connect_database_user
 import numpy as np
 from pathlib import Path
-from ..Validation.RegisterStore import Store, Orders
+from ..Validation.RegisterStore import Store, StoreMetrics
 from datetime import datetime
 import ollama
 from argon2 import PasswordHasher
@@ -78,8 +79,11 @@ async def register_store(
 
             if "BLOCK" in result:
                 return {"Status": False, "Error": "Invalid restaurant name."}
-        except Exception as e:
-            return {"Status": False, "Error": "Unable to validate restaurant name."}
+        except Exception:
+            return {
+                "Status": False,
+                "Error": "Unable to validate restaurant name.",
+            }
         if image:
             image_data = await image.read()
 
@@ -143,8 +147,35 @@ async def register_store(
 
                 return {"Status": True, "token": store[0], "image": image_url}
             hash_password = ph.hash(data.password)
-            command_sql = """ INSERT INTO restaurantConfig(name,image, CNPJ, CEP, session_token, invoicing, invoicing_history, orders, completed, progress, password, restauranttag, owner_token)
-                            VALUES (%s, %s,%s, %s, %s, %s, %s, %s ,%s, %s, %s, %s,%s)"""
+            command_sql = """
+INSERT INTO restaurantConfig (
+    name,
+    image,
+    CNPJ,
+    CEP,
+    session_token,
+    invoicing,
+    invoicing_history,
+    orders,
+    completed,
+    progress,
+    password,
+    restauranttag,
+    owner_token,
+    nation,
+    city,
+    state,
+    state_abbreviation,
+    uf,
+    latitude,
+    longitude
+)
+VALUES (
+    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+    %s
+)
+"""
             cursor.execute(
                 command_sql,
                 (
@@ -161,6 +192,13 @@ async def register_store(
                     hash_password,
                     data.restauranttag,
                     user_token,
+                    data.nation,
+                    data.city,
+                    data.state,
+                    data.state_abbreviation,
+                    data.uf,
+                    data.latitude,
+                    data.longitude,
                 ),
             )
             conn.commit()
@@ -168,7 +206,10 @@ async def register_store(
             if conn:
                 conn.rollback()
 
-            return {"Status": False, "Error": "Unable to register restaurant."}
+            return {
+                "Status": False,
+                "Error": "Unable to register restaurant.",
+            }
 
         response.set_cookie(
             key="restaurant_session_token",
@@ -211,7 +252,15 @@ def get_store(
     try:
         conn, cursor = connect_database()
         cursor.execute(
-            "SELECT name,image, CNPJ, CEP, invoicing, invoicing_history, orders, completed, progress, orderImage, orderName, orderPrice ,orderDescription, orderState, restauranttag,restaurantComments FROM restaurantConfig WHERE session_token = %s",
+            """
+    SELECT name, image, CNPJ, CEP, invoicing, invoicing_history,
+           orders, completed, progress, orderImage, orderName,
+           orderPrice, orderDescription, orderState, restauranttag,
+           restaurantComments, nation,
+           city, state, latitude, longitude
+    FROM restaurantConfig
+    WHERE session_token = %s
+    """,
             (token,),
         )
         store = cursor.fetchone()
@@ -278,6 +327,12 @@ def get_store(
                 "orderPriceMean": orderPriceMean,
                 "restauranttag": store[14],
                 "restaurantComments": store[15],
+                "nation": store[16],
+                "city": store[17],
+                "state": store[18],
+                "latitude": store[19],
+                "longitude": store[20],
+                "googleMaps": f"https://www.google.com/maps/search/?api=1&query={store[19]},{store[20]}",
             }
         return {"Status": False}
     except Exception as e:
@@ -326,7 +381,7 @@ def restaurants():
 
 
 @router.put("/api/store/metrics")
-def update_metrics(data: Store):
+def update_metrics(data: StoreMetrics):
     conn = None
     cursor = None
     try:
@@ -487,7 +542,6 @@ orderState = array_append(COALESCE(orderState, ARRAY[]::boolean[]), %s)
         if conn:
             conn.rollback()
         return {"Status": False, "Error": "Error"}
-  
 
 
 @router.get("/orders_items")
@@ -538,9 +592,9 @@ def orders_items(request: Request, restaurant_session_token: str | None = None):
             conn.close()
 
 
-def ban(conn,cursor, token):
+def ban(conn, cursor, token):
     try:
-        
+
         cursor.execute(
             """
             UPDATE users_Dailyfoods 
@@ -634,7 +688,7 @@ def login_Store(data: LoginStore, response: Response, request: Request):
         attempts = cursorUser.fetchone()[0]
 
         if attempts >= 20:
-            return ban(connUser,cursorUser, tokenUser)
+            return ban(connUser, cursorUser, tokenUser)
 
         return {"Status": False}
 
@@ -809,16 +863,20 @@ async def update_store_image(request: Request, image: UploadFile = File(...)):
         if conn:
             conn.close()
 
-@router.post('/ban_verification')
+
+@router.post("/ban_verification")
 def ban_verification(request: Request):
     conn = None
     cursor = None
     tokenUser = request.cookies.get("user_session_token")
     try:
-        conn,cursor = connect_database_user()
-        cursor.execute("SELECT Ban from users_Dailyfoods WHERE session_token = %s", (tokenUser, ))
+        conn, cursor = connect_database_user()
+        cursor.execute(
+            "SELECT Ban from users_Dailyfoods WHERE session_token = %s", (tokenUser,)
+        )
         response = cursor.fetchone()
-        if response and response[0] is True: return{"Status": True, 'Ban': True} 
+        if response and response[0] is True:
+            return {"Status": True, "Ban": True}
         return {"Status": True, "Ban": False}
     except Exception:
-        return{"Status": False, "Error": 'Error'}
+        return {"Status": False, "Error": "Error"}

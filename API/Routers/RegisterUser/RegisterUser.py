@@ -3,6 +3,7 @@ import requests
 from ...Database.Config.connectDatabaseUser import connect_database_user
 from fastapi import APIRouter, Response
 import uuid
+from ...Validation.RegisterUser import  User
 import ollama
 from pathlib import Path
 from argon2 import PasswordHasher
@@ -27,7 +28,7 @@ def register_user(data: User, response: Response):
         verification_response.raise_for_status()
         dataResponse = verification_response.json()
         try:
-            PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "nameUser.txt"
+            PROMPT_PATH = Path(__file__).parent.parent.parent / "prompts" / "nameUser.txt"
             
             with open(PROMPT_PATH, "r", encoding="utf-8") as file:
                 prompt = file.read()
@@ -44,7 +45,7 @@ def register_user(data: User, response: Response):
             )
 
             result = moderation["message"]["content"].strip().upper()
-
+         
             if result.startswith("BLOCK"):
                 return {"Status": False, "Error": "Invalid name."}
         except Exception :

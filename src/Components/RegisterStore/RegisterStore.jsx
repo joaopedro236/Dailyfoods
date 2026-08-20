@@ -2,6 +2,7 @@ import './RegisterStore.css'
 import itemsSelect from './RegisterStoreSelectJSON'
 import DashboardStore from './Components/DashboardStore'
 import PhotoDesktop from '../../assets/Photos/screenshot_30.png'
+import nations from './RegisterStoreNationJSON'
 import { useState, useEffect } from 'react'
 import Select from 'react-select';
 import inputs from './RegisterStoreJSON'
@@ -11,7 +12,7 @@ function Input(props) {
         <>
             <div className={`flex flex-col gap-1 `}>
                 <label htmlFor={props.name} className='text-sm'>{props.label}</label>
-                <input type={props.type} name={props.name} id={props.name} placeholder={props.placeholder} value={props.value} onChange={(e) => { props.onChange(e) }} required minLength={props.minLength} maxLength={props.maxLength} className='bg-transparent p-2 py-2.5 rounded-md w-full' />
+                <input type={props.type} name={props.name} id={props.name} placeholder={props.placeholder} value={props.value} onChange={(e) => { props.onChange(e) }} required minLength={props.minLength} maxLength={props.maxLength} className='bg-white p-2 py-2.5 rounded-md w-full' />
             </div>
         </>
     )
@@ -26,7 +27,9 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
         CEP: '',
         password: '',
         image: null,
-        restaurantNote: 0
+        restaurantNote: 0,
+
+        nation: ''
     })
     const [previewImage, setPreviewImage] = useState(null)
     const handleFormEdit = (event) => {
@@ -81,6 +84,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
             form.append("CEP", formData.CEP)
             form.append("password", formData.password)
             form.append("restauranttag", tags.join(','));
+            form.append("nation", selectedNation?.value || '')
 
             const response = await fetch(`${APIURL}/api/registerStore`, {
                 method: 'POST',
@@ -89,16 +93,15 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                 body: form
             })
             const json = await response.json()
-            if (!response.ok || !data.Status) {
-                if (data.Error === 'Image is too large.') {
+            if (!response.ok || !json.Status) {
+                if (json.Error === 'Image is too large.') {
                     alert('Image is too large.')
-                } else if (data.Error === 'Only JPEG images are allowed.') {
+                } else if (json.Error === 'Only JPEG images are allowed.') {
                     alert('Only JPEG images are allowed.')
-                } else if (data.Error === 'Image dimensions are too large.') {
+                } else if (json.Error === 'Image dimensions are too large.') {
                     alert('Image dimensions are too large.')
                 }
 
-                throw new Error(data.Error || `Request error: ${response.status}`)
             }
             if (json.Status === false) {
                 setNextStep(false)
@@ -171,7 +174,11 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                     orderExists: jsonCall.orderExists ?? false,
                     restauranttag: jsonCall.restauranttag ?? [],
                     password: formData.password,
-                    restaurantNote: formData.restaurantNote
+                    restaurantNote: formData.restaurantNote,
+                    nation: jsonCall.nation,
+                    latitude: jsonCall.latitude,
+                    longitude: jsonCall.longitude
+                    
                 })
                 setNextStep(true)
                 return
@@ -195,6 +202,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
         APICall()
     }, [state])
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [selectedNation, setSelectedNation] = useState(null)
     const shouldShowDashboard = nextStep === true || Boolean(formDataAPI?.CNPJ || formDataAPI?.name)
     const [imageInfo, setImageInfo] = useState(null)
 
@@ -228,7 +236,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
     }
     return (
         <>
-            <section className={`registerStore w-full  min-h-screen  z-30 px-4 py-2 pt-[90px] items-center justify-center ${state === 2 && !shouldShowDashboard ? 'flex' : 'hidden'} `}>
+            <section className={`registerStore w-full    z-30 px-4 py-2 pt-[90px] items-center justify-center ${state === 2 && !shouldShowDashboard ? 'flex' : 'hidden'} `}>
                 <div className=" card__registerStore w-full max-w-[930px]  h-min flex  gap-6 rounded-[16px]  items-center justify-center px-3">
                     <div className="cardContent w-full  flex flex-col gap-6 h-min">
                         <header className='flex flex-col text-center items-center justify-center'>
@@ -292,7 +300,48 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                                         closeMenuOnSelect={false}
                                         required
                                     />
-
+                                    <Select
+                                        options={nations.map(nation => ({
+                                            value: nation,
+                                            label: nation
+                                        }))}
+                                        value={selectedNation}
+                                        onChange={(value) => {
+                                            setSelectedNation(value)
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                nation: value?.value || ''
+                                            }))
+                                        }}
+                                        styles={{
+                                            control: (base) => ({
+                                                ...base,
+                                                cursor: "pointer",
+                                            }),
+                                            option: (base) => ({
+                                                ...base,
+                                                cursor: "pointer",
+                                            }),
+                                            multiValueRemove: (base) => ({
+                                                ...base,
+                                                cursor: "pointer",
+                                            }),
+                                            dropdownIndicator: (base) => ({
+                                                ...base,
+                                                cursor: "pointer",
+                                            }),
+                                            clearIndicator: (base) => ({
+                                                ...base,
+                                                cursor: "pointer",
+                                            })
+                                        }}
+                                        placeholder='Select Nation categories...'
+                                        closeMenuOnSelect={false}
+                                        required
+                                        className='mt-4'
+                                    />
+                                    <p className='text-xs text-gray-500'>This is used to validate the ZIP code.
+</p>
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <label htmlFor="image" className='text-sm cursor-pointer'>Restaurant photo</label>
@@ -300,7 +349,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                                         e.preventDefault()
                                         handleFileChange(e)
                                         handleImage(e)
-                                    }} className='bg-transparent p-2 py-2.5 rounded-md w-full' />
+                                    }} className='bg-white p-2 py-2.5 rounded-md w-full' />
 
                                 </div>
                                 <input type="submit" value={`${submitActive ? 'Loading' : 'Sign up Now'}`} className={`submit__registerStore  text-white rounded-[12px] p-3 cursor-pointer w-full ${submitActive ? 'opacity-85' : ''}`} />
@@ -322,15 +371,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                 </div>
             </section>
 
-            {imageInfo && (
-                <div>
-                    <p>Nome: {imageInfo.name}</p>
-                    <p>Tamanho: {imageInfo.size} MB</p>
-                    <p>Tipo: {imageInfo.type}</p>
-                    <p>Largura: {imageInfo.width}px</p>
-                    <p>Altura: {imageInfo.height}px</p>
-                </div>
-            )}
+
             <DashboardStore formDataAPI={formDataAPI} setFormDataAPI={setFormDataAPI} nextStep={shouldShowDashboard} setNextStep={setNextStep} state={state} previewImage={previewImage} setPreviewImage={setPreviewImage} onImageSelect={updateSelectedImage} />
         </>
     )

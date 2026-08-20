@@ -13,10 +13,11 @@ import { useState, useEffect } from "react"
 function App() {
   const navigate = useNavigate()
   const [nextStep, setNextStep] = useState(false)
+  const[loginUserActive, setLoginUserActive] = useState(false)
   const [nextStepLoginUser, setNextStepLoginUser] = useState(false)
   const [user, setUser] = useState(false)
   const [chatbotActive, setChatBotActive] = useState(false)
-  const [asideOrNavbarItems, setAsideOrNavbarItems] = useState(5)
+  const [asideOrNavbarItems, setAsideOrNavbarItems] = useState(4)
   const [formDataAPI, setFormDataAPI] = useState({})
   useEffect(() => {
     const media = window.matchMedia('(min-width: 1024px)')
@@ -56,7 +57,7 @@ function App() {
 
         const number = Number(e.key)
 
-        if (number >= 1 && number <= 5 && user == true) {
+        if (number >= 1 && number <= 4 && user == true) {
           e.preventDefault()
           setAsideOrNavbarItems(number)
 
@@ -73,7 +74,7 @@ function App() {
     }
   }, [user])
   useEffect(() => {
-    setAsideOrNavbarItems(user ? 1 : 5)
+    setAsideOrNavbarItems(user ? 1 : 4)
   }, [user])
   const [banBruteForce, setBanBruteForce] = useState(false)
   const handleBanBruteForce = async () => {
@@ -125,9 +126,9 @@ function App() {
 
       <RegisterStore state={asideOrNavbarItems} nextStepTwo={nextStep} formDataAPI={formDataAPI}
         setFormDataAPI={setFormDataAPI} />
-      <RegisterUser chatBotActive={setChatBotActive} nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setState={setAsideOrNavbarItems} />
+      <RegisterUser chatBotActive={setChatBotActive} nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setState={setAsideOrNavbarItems} loginUserActive={loginUserActive}  setLoginUserActive={ setLoginUserActive}/>
       <LoginStore state={asideOrNavbarItems} setNextStep={setNextStep} setState={setAsideOrNavbarItems} setFormDataAPI={setFormDataAPI} />
-      <LoginUser nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setNextStep={setNextStep} setState={setAsideOrNavbarItems} />
+      <LoginUser nextStep={nextStepLoginUser} setNextStep={setNextStepLoginUser} user={user} setUser={setUser} state={asideOrNavbarItems} setNextStep={setNextStep} setState={setAsideOrNavbarItems}  loginUserActive={loginUserActive} setLoginUserActive={setLoginUserActive} />
       <Chatbot setChatBotActive={setChatBotActive} chatbotActive={chatbotActive} />
     </>
   )

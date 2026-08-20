@@ -1,7 +1,7 @@
 import './LoginUser.css'
 import { useState, useEffect } from 'react'
 
-export default function LoginUser({ state, setState, setUser, setNextStep }) {
+export default function LoginUser({  setUser, setNextStep,loginUserActive, setLoginUserActive }) {
     const [CNPJ, setCNPJ] = useState("")
     const [password, setPassword] = useState("")
     const [formDataAPI, setFormDataAPI] = useState({})
@@ -38,6 +38,7 @@ export default function LoginUser({ state, setState, setUser, setNextStep }) {
 
                 if (userData.Status) {
                     setUser(userData);
+                    setLoginUserActive(false)
                 }
                 setState(5)
                 setNextStep(true)
@@ -46,12 +47,14 @@ export default function LoginUser({ state, setState, setUser, setNextStep }) {
         } catch (error) {
             console.error(error)
         }
+    
     }
     return (
         <>
-            <section className={`loginUser ${state == 4 ? 'flex' : 'hidden'} bg-white w-full h-screen p-3 pt-[90px] justify-center flex-col gap-7`}>
-                <header>
+            <section className={`loginUser ${loginUserActive? 'flex' : 'hidden'} bg-white w-full h-screen p-3 pt-[90px] justify-center flex-col gap-7`}>
+                <header className='flex justify-between items-center px-1'>
                     <h1>Login User</h1>
+                    <button onClick={()=> setLoginUserActive(false)}>X</button>
                 </header>
                 <form className={`flex flex-col gap-6 w-full`} onSubmit={handleForm}>
                     <input
