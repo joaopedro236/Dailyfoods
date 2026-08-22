@@ -172,8 +172,7 @@ INSERT INTO restaurantConfig (
 )
 VALUES (
     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-    %s
+    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
 )
 """
             cursor.execute(
@@ -202,13 +201,15 @@ VALUES (
                 ),
             )
             conn.commit()
-        except Exception as db_error:
+        except Exception as db_error :
             if conn:
                 conn.rollback()
-
+            import traceback
+            traceback.print_exc()
             return {
                 "Status": False,
                 "Error": "Unable to register restaurant.",
+                "ErrorGross": str(db_error)
             }
 
         response.set_cookie(
@@ -350,7 +351,7 @@ def restaurants():
     cursor = None
     try:
         conn, cursor = connect_database()
-        command_sql = """select id, name,image,cep,orderExists,orderImage, orderName, OrderPrice, OrderDescription,OrderState, restauranttag,restaurantComments from restaurantConfig"""
+        command_sql = """select id, name,image,cep,orderExists,orderImage, orderName, OrderPrice, OrderDescription,OrderState, restauranttag,restaurantComments, latitude, longitude from restaurantConfig"""
         cursor.execute(command_sql)
         rows = cursor.fetchall()
         result = [
@@ -367,6 +368,8 @@ def restaurants():
                 "orderState": row[9],
                 "restauranttag": row[10],
                 "restaurantComments": row[11],
+                "latitude": row[12],
+                "longitude": row[13]
             }
             for row in rows
         ]

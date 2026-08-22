@@ -93,24 +93,33 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                 body: form
             })
             const json = await response.json()
-            if (!response.ok || !json.Status) {
-                if (json.Error === 'Image is too large.') {
-                    alert('Image is too large.')
-                } else if (json.Error === 'Only JPEG images are allowed.') {
-                    alert('Only JPEG images are allowed.')
-                } else if (json.Error === 'Image dimensions are too large.') {
-                    alert('Image dimensions are too large.')
-                }
-
+            if (
+                !response.ok ||
+                !json.Status ||
+                json.Error ||
+                json.detail ||
+                !json.latitude ||
+                !json.longitude
+            ) {
+                alert(json.Error || "Invalid CEP.")
+                setNextStep(false)
+                return false
             }
-            if (json.Status === false) {
+            if (!response.ok || !json.Status || json.Error || json.detail) {
+                const errorMessage =
+                    json.Error ||
+                    json.detail ||
+                    'Unable to validate the information.'
+
+                alert(errorMessage)
+
                 setNextStep(false)
 
-                if (json.Error === "Invalid name.") {
+                if (errorMessage === "Invalid name.") {
                     setNameInvalid(true)
                 }
 
-                if (json.Error === "CNPJ already exists.") {
+                if (errorMessage === "CNPJ already exists.") {
                     setCnpjError(true)
                 }
 
@@ -178,7 +187,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                     nation: jsonCall.nation,
                     latitude: jsonCall.latitude,
                     longitude: jsonCall.longitude
-                    
+
                 })
                 setNextStep(true)
                 return
@@ -203,7 +212,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
     }, [state])
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedNation, setSelectedNation] = useState(null)
-    const shouldShowDashboard = nextStep === true || Boolean(formDataAPI?.CNPJ || formDataAPI?.name)
+    const shouldShowDashboard = nextStep === true
     const [imageInfo, setImageInfo] = useState(null)
 
     const handleImage = (e) => {
@@ -341,7 +350,7 @@ export default function RegisterStore({ state, nextStepTwo, formDataAPI, setForm
                                         className='mt-4'
                                     />
                                     <p className='text-xs text-gray-500'>This is used to validate the ZIP code.
-</p>
+                                    </p>
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <label htmlFor="image" className='text-sm cursor-pointer'>Restaurant photo</label>

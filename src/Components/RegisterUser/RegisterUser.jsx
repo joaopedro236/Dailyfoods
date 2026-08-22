@@ -24,7 +24,7 @@ export default function Login({ state, nextStep, setNextStep, user, setUser, cha
         }))
     }
     const apiURL = import.meta.env.VITE_API_URL
-    const [userInformations, setUserInformation] = useState({ money: 0.0, purchasedOrders:0 })
+    const [userInformations, setUserInformation] = useState({ money: 0.0, purchasedOrders: 0 })
     useEffect(() => {
         const restoreSession = async () => {
             try {
@@ -39,8 +39,8 @@ export default function Login({ state, nextStep, setNextStep, user, setUser, cha
                     setUserInformation({
                         money: json?.money || 0.0,
                         purchasedOrders: json?.purchasedOrders || 0
-                        
-                })
+
+                    })
                 }
             } catch (error) {
                 console.error(error)
@@ -68,22 +68,39 @@ export default function Login({ state, nextStep, setNextStep, user, setUser, cha
                 body: JSON.stringify(formData)
             })
             const json = await response.json()
+
+            if (!response.ok || json.Error || json.detail) {
+                alert(
+                    json.Error ||
+                    (Array.isArray(json.detail) ? json.detail[0]?.msg : json.detail) ||
+                    'Unable to validate data.'
+                )
+                return false
+            }
             if (!response.ok) {
                 return false
+                alert('Error')
             }
 
             if (json.StatusEmail === true) {
                 setEmailExists(true)
+
+                alert('This email already exists.')
                 return false
+
             }
             setEmailExists(false)
             if (json.StatusCnpj == true) {
                 setCNPJExists(true)
+
+                alert('This cnpj already exists.')
                 return false
             }
             setCNPJExists(false)
             if (json?.Error === 'Unable to validate  name.') {
                 setNameInvalid(true)
+
+                alert('This nameInvalid already exists.')
                 return false
             }
             setNameInvalid(false)
@@ -98,7 +115,7 @@ export default function Login({ state, nextStep, setNextStep, user, setUser, cha
     }
     return (
         <>
-            <section className={`login w-full relative z-30 px-1 flex-col ${!nextStep && state == 4 && !user && !loginUserActive  ? 'flex' : 'hidden'} `}>
+            <section className={`login w-full relative z-30 px-1 flex-col ${!nextStep && state == 4 && !user && !loginUserActive ? 'flex' : 'hidden'} `}>
                 <header className='loginHeader relative z-10 flex flex-col p-7 gap-2 h-[300px] justify-center'>
                     <h1 className='text-white font-bold w-full max-w-56x text-[20px] '>Discover Dailyfoods plans and boost your sales.</h1>
                     <p className='text-gray-300 text-[12px]'>Discover how Dailyfoods plans can boost your sales by connecting your restaurant to millions of potential customers.</p>
@@ -118,11 +135,11 @@ export default function Login({ state, nextStep, setNextStep, user, setUser, cha
                         <p className={`text-red-700 text-sm ${emailExists ? 'flex' : 'hidden'}`}>This email already exists.</p>
                         <input type="submit" disabled={submitActive} value={submitActive ? "Loading..." : "Sign Up Now"} className={`submit__login  text-white rounded-[12px] mt-4 p-3 cursor-pointer w-full ${submitActive ? 'opacity-85' : ''}`} />
                     </form>
-                    <p className='text-sm cursor-pointer login_registerUser w-fit' onClick={()=>  setLoginUserActive(true)}>Do you want to log in?</p>
+                    <p className='text-sm cursor-pointer login_registerUser w-fit' onClick={() => setLoginUserActive(true)}>Do you want to log in?</p>
                     <p className='text-sm text-gray-600'>By continuing, you agree to receive communications from Dailyfoods.</p>
                 </div>
             </section>
-            <RegisterNSComponent chatBotActive={chatBotActive} userInformations={userInformations} state={nextStep} CNPJExists={CNPJExists} user={user} setUser={setUser} stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
+            <RegisterNSComponent emailExists={emailExists} chatBotActive={chatBotActive} userInformations={userInformations} state={nextStep} CNPJExists={CNPJExists} user={user} setUser={setUser} stateSection={state} setState={setNextStep} handleForm={handleForm} formData={formData} handleFormEdit={handleFormEdit} />
 
         </>
     )

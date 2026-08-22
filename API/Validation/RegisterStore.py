@@ -69,9 +69,9 @@ class Store(BaseModel):
     def validationCNPJ(cls, value):
         value = value.replace(".", "").replace("-", "").replace("/", "")
         if len(value) != 14:
-            raise ValueError("Error: The CNPJ must have 14 digits.  ")
+           return{"Error":"The CPJ must have 14 digits."}
         if not value.isdigit():
-            raise ValueError("INVALID CNPJ")
+           return{"Error":"INVALID CNPJ"}
         return value
 
     @model_validator(mode="after")
@@ -81,19 +81,19 @@ class Store(BaseModel):
             cep = "".join(filter(str.isdigit, self.CEP))
 
             if not cep:
-                raise ValueError("Invalid CEP")
+               return{"Error":"Invalid CEP"}
             country = str(self.nation).strip().lower()
             url = f"https://api.zippopotam.us/{country}/{cep}"
 
             response = requests.get(url, timeout=5, verify=False)
 
             if response.status_code != 200:
-                raise ValueError("Invalid CEP")
+               return{"Error":"Invalid CEP"}
 
             data = response.json()
 
             if not data.get("places"):
-                raise ValueError("Invalid CEP")
+               return{"Error":"Invalid CEP"}
 
             place = data["places"][0]
 
@@ -109,7 +109,7 @@ class Store(BaseModel):
             return self
 
         except requests.RequestException :
-            raise ValueError("Unable to validate CEP")
+           return{"Error":"Unable to vaidate CEP"}
 
     @classmethod
     def as_form(

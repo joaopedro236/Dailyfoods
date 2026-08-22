@@ -96,6 +96,13 @@ export default function Restaurant({ restaurant, restaurantActive, setRestaurant
                         </div>
 
                     </div>
+                    <div className="googleMaps_restaurantActive flex flex-col items-center justify-center gap-6 px-3 w-full h-[400px] max-w-[600px]">
+                        <header>
+                            <h1>Google Maps</h1>
+                        </header>
+                        <iframe src={`https://www.google.com/maps?q=${restaurant?.latitude},${restaurant?.longitude}&output=embed`}  className='border-0 w-full h-full rounded-lg' allowFullScreen loading='lazy'></iframe>
+
+                    </div>
                 </div>
             </section>
             <OrderActive selectedOrder={selectedOrder} setSelectedOrder={setSelectedOrder} />

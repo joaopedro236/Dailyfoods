@@ -50,7 +50,7 @@ export default function User({ user, formData, userInformations, stateSection, c
                         </figure>
                         <div className="userHeaderContent flex flex-col  justify-center items-center">
                             <h1 className='text-white font-[20px]'>{formData?.name}</h1>
-                            <span className='text-white text-sm w-full max-w-[170px] mt-1 relative py-0.5  font-stretch-expanded rounded-[15px]'>Verified User</span>
+                            <span className='text-white text-sm w-[140px] mt-1 relative py-0.5  font-stretch-expanded rounded-[15px]'>Verified User</span>
                         </div>
                     </header>
 

@@ -9,8 +9,9 @@ export default function RegisterNS({
     state,
     setState,
     handleForm,
-    formData,userInformations,
+    formData, userInformations,
     handleFormEdit,
+    emailExists,
     stateSection,
     CNPJExists,
     chatBotActive
@@ -43,7 +44,7 @@ export default function RegisterNS({
 
         APICall()
     }, [])
-    
+
     return (
         <>
             <section className={`registerNS ${state == true && stateSection == 4 ? 'flex' : 'hidden'} ${user == true ? '!hidden' : ''} bg-white w-full h-screen  pt-7 `}>
@@ -60,7 +61,7 @@ export default function RegisterNS({
                         setSubmitActive(true);
                         try {
                             const success = await handleForm(e)
-
+                            if (!success) return
                             await APICall()
                         } catch (error) {
                             console.error(error)
@@ -80,6 +81,8 @@ export default function RegisterNS({
 
                             ))
                         }
+                        <p className={`text-red-700 text-sm ${emailExists ? 'flex' : 'hidden'}`}>This email already exists.</p>
+
                         <p className={`text-red-700 text-sm ${CNPJExists ? 'flex' : 'hidden'}`}>CNPJ exists</p>
                         <p className={`text-red-700 text-sm ${nameInvalid ? 'flex' : 'hidden'}`}>Unable to validate name.</p>
                         <p className='text-gray-600 text-xs'>To adjust, go back to the previous screen.</p>

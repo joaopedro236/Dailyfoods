@@ -11,7 +11,7 @@ def create_databaseRC():
                 name VARCHAR(300) NOT NULL,       
                 image VARCHAR(255),
                 CNPJ CHAR(14) NOT NULL UNIQUE,
-                CEP CHAR(9) NOT NULL,
+                CEP TEXT,
                 session_token UUID NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 invoicing NUMERIC(10,2) DEFAULT 0.0 NOT NULL,
